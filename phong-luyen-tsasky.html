@@ -5,9 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phòng luyện Thi - TSA SKY</title>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js">
+/* TSA ADVANCED QUESTION TYPES */
+function toggleMultiAnswer(letter){
+    if(!examAnswers[currentQuestionIndex]) examAnswers[currentQuestionIndex]=[];
+    let arr=examAnswers[currentQuestionIndex];
+    if(arr.includes(letter)) arr=arr.filter(x=>x!==letter);
+    else arr.push(letter);
+    examAnswers[currentQuestionIndex]=arr;
+    renderCurrentQuestion();
+}
+
+function saveEssayAnswer(el){
+    examAnswers[currentQuestionIndex]=el.value;
+    updateMatrixStatusStyles();
+}
+
+</script>
     
-    <script src="data/exam-list.js"></script>
+    <script src="data/exam-list.js">
+/* TSA ADVANCED QUESTION TYPES */
+function toggleMultiAnswer(letter){
+    if(!examAnswers[currentQuestionIndex]) examAnswers[currentQuestionIndex]=[];
+    let arr=examAnswers[currentQuestionIndex];
+    if(arr.includes(letter)) arr=arr.filter(x=>x!==letter);
+    else arr.push(letter);
+    examAnswers[currentQuestionIndex]=arr;
+    renderCurrentQuestion();
+}
+
+function saveEssayAnswer(el){
+    examAnswers[currentQuestionIndex]=el.value;
+    updateMatrixStatusStyles();
+}
+
+</script>
 
     <style>
         :root {
@@ -65,12 +97,7 @@
         .mcq-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; margin-bottom: 24px; }
         .mcq-option { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px 16px; border-radius: 8px; font-weight: 600; color: var(--dark-navy); text-align: left; transition: all 0.2s; cursor: pointer; }
         .mcq-option:hover { background: #e6f4ff; border-color: var(--primary-blue); }
-        .mcq-option.selected {
-            background: var(--primary-blue);
-            color: white;
-            border-color: var(--primary-blue);
-            box-shadow: 0 4px 10px rgba(22, 119, 255, 0.3);
-        }
+        .mcq-option.selected { background: var(--primary-blue); color: white; border-color: var(--primary-blue); box-shadow: 0 4px 10px rgba(22, 119, 255, 0.3); }
 
         .fill-input { border: none; border-bottom: 2px solid var(--primary-blue); width: 150px; text-align: center; font-weight: 700; font-size: var(--q-font-size); color: var(--primary-blue); outline: none; padding: 4px; background: #f8fafc; }
 
@@ -104,64 +131,37 @@
 
         /* --- GIAO DIỆN DÀNH CHO ĐIỆN THOẠI (MOBILE RESPONSIVE TỐI ƯU CUỘN) --- */
         @media (max-width: 850px) {
-            body, html {
-                height: auto;
-                overflow-y: auto;
-            }
+            body, html { height: auto; overflow-y: auto; }
             
-            .exam-workspace {
-                display: flex;
-                flex-direction: column;
-                height: auto; 
-            }
+            .exam-workspace { display: flex; flex-direction: column; height: auto; }
             
-            .question-panel {
-                margin: 0;
-                border-radius: 0;
-                border-left: none;
-                border-right: none;
-                height: auto; 
-                overflow: visible; 
-            }
+            .question-panel { margin: 0; border-radius: 0; border-left: none; border-right: none; height: auto; overflow: visible; }
             
-            .question-scroll-content {
-                overflow-y: visible; 
-                height: auto;
-                padding: 20px 16px;
-            }
+            .question-scroll-content { overflow-y: visible; height: auto; padding: 20px 16px; }
             
-            .bottom-nav-bar {
-                position: sticky;
-                bottom: 0;
-                z-index: 100;
-                background: #ffffff;
-                box-shadow: 0 -4px 15px rgba(5, 26, 57, 0.08);
-                padding: 12px 16px;
-            }
+            .bottom-nav-bar { position: sticky; bottom: 0; z-index: 100; background: #ffffff; box-shadow: 0 -4px 15px rgba(5, 26, 57, 0.08); padding: 12px 16px; }
 
-            .sidebar-panel {
-                border-left: none;
-                border-top: 6px solid var(--border-color);
-                padding: 24px 16px;
-                height: auto;
-            }
+            .sidebar-panel { border-left: none; border-top: 6px solid var(--border-color); padding: 24px 16px; height: auto; }
             
-            .mcq-row {
-                grid-template-columns: 1fr; 
-                gap: 12px;
-            }
+            .mcq-row { grid-template-columns: 1fr; gap: 12px; }
             
-            .exam-list-grid {
-                grid-template-columns: 1fr;
-            }
+            .exam-list-grid { grid-template-columns: 1fr; }
             
-            .auth-card {
-                padding: 24px 16px;
-                margin: 16px;
-                width: auto;
-            }
+            .auth-card { padding: 24px 16px; margin: 16px; width: auto; }
         }
     </style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
 </head>
 <body>
 
@@ -333,7 +333,6 @@
             }
             const script = document.createElement('script');
             script.src = fileUrl;
-            
             script.onload = callback;
             
             script.onerror = function() {
@@ -352,7 +351,6 @@
             
             document.getElementById('exam-code').value = "Đang tải dữ liệu...";
             showStep(1);
-
             loadExamScript(fileUrl, function() {
                 if (window.examQuestionsData && window.examQuestionsData[examId]) {
                     questionsDataset = window.examQuestionsData[examId];
@@ -405,7 +403,6 @@
                     completedCount++;
                 }
             });
-
             const total = questionsDataset.length;
             const percentage = Math.round((completedCount / total) * 100) || 0;
             document.getElementById('progress-ratio').innerText = `${completedCount}/${total} câu`;
@@ -427,51 +424,433 @@
             updateMatrixStatusStyles();
         }
 
-        function renderCurrentQuestion() {
-            const container = document.getElementById('question-display-container');
-            if (!questionsDataset || questionsDataset.length === 0) return;
-            
-            const qData = questionsDataset[currentQuestionIndex];
-            let htmlHTML = `
-                <div class="question-header-row">
-                    <div class="question-number-badge">${currentQuestionIndex + 1}</div>
-                    <div class="question-main-text">${qData.text.replace(/\n/g, '<br>')}</div>
+        
+function renderCurrentQuestion() {
+
+    const container = document.getElementById('question-display-container');
+
+    if (!questionsDataset || questionsDataset.length === 0) return;
+
+    const qData = questionsDataset[currentQuestionIndex];
+
+    let htmlHTML = `
+        <div class="question-header-row">
+            <div class="question-number-badge">${currentQuestionIndex + 1}</div>
+            <div class="question-main-text">${qData.text || ''}</div>
+        </div>
+    `;
+
+    if (qData.type === 'mcq' && qData.options) {
+
+        const letters = ['A','B','C','D','E','F'];
+
+        let optionsHtml = '';
+
+        qData.options.forEach((optText, idx) => {
+
+            const letter = letters[idx];
+
+            const activeClass =
+                examAnswers[currentQuestionIndex] === letter
+                    ? 'selected'
+                    : '';
+
+            optionsHtml += `
+                <div
+                    class="mcq-option ${activeClass}"
+                    onclick="selectMCQOption('${letter}')">
+
+                    <strong>${letter}.</strong>
+                    ${optText}
+
                 </div>
             `;
+        });
 
-            if (qData.type === 'mcq' && qData.options) {
-                const letters = ['A', 'B', 'C', 'D'];
-                let optionsHtml = '';
-                
-                qData.options.forEach((optText, idx) => {
-                    const letter = letters[idx];
-                    const isSelected = examAnswers[currentQuestionIndex] === letter;
-                    const activeClass = isSelected ? 'selected' : '';
-                    
-                    optionsHtml += `
-                        <div class="mcq-option ${activeClass}" onclick="selectMCQOption('${letter}')">
-                            ${optText}
-                        </div>`;
-                });
-                htmlHTML += `<div class="mcq-row">${optionsHtml}</div>`;
-            } 
-            else if (qData.type === 'fill') {
-                const savedVal = examAnswers[currentQuestionIndex] || '';
-                htmlHTML += `
-                    <div style="margin-left: 52px; margin-top: 20px;">
-                        <span style="font-weight:600; color: var(--dark-navy);">Nhập đáp án của bạn: </span>
-                        <input type="text" class="fill-input" value="${savedVal}" oninput="saveFillAnswer(this)">
-                    </div>
-                `;
-            }
+        htmlHTML += `
+            <div class="mcq-row">
+                ${optionsHtml}
+            </div>
+        `;
+    }
 
-            container.innerHTML = htmlHTML;
-            document.getElementById('btn-prev').disabled = (currentQuestionIndex === 0);
-            document.getElementById('btn-next').disabled = (currentQuestionIndex === questionsDataset.length - 1);
-            updateMatrixStatusStyles();
+    else if (qData.type === 'multi' && qData.options) {
+
+        const letters = ['A','B','C','D','E','F'];
+
+        const selected =
+            examAnswers[currentQuestionIndex] || [];
+
+        let optionsHtml = '';
+
+        qData.options.forEach((optText, idx) => {
+
+            const letter = letters[idx];
+
+            const activeClass =
+                selected.includes(letter)
+                    ? 'selected'
+                    : '';
+
+            optionsHtml += `
+                <div
+                    class="mcq-option ${activeClass}"
+                    onclick="toggleMultiAnswer('${letter}')">
+
+                    <strong>${letter}.</strong>
+                    ${optText}
+
+                </div>
+            `;
+        });
+
+        htmlHTML += `
+            <div class="mcq-row">
+                ${optionsHtml}
+            </div>
+        `;
+    }
+else if (qData.type === 'fill') {
+
+    const savedVal =
+        examAnswers[currentQuestionIndex] || '';
+
+    htmlHTML += `
+        <div
+            style="
+                margin-left:52px;
+                margin-top:20px;
+            ">
+
+            <input
+                type="text"
+                class="fill-input"
+                value="${savedVal}"
+                oninput="saveFillAnswer(this)">
+
+        </div>
+    `;
+}
+    else if(qData.type === 'fillmulti'){
+
+    const saved =
+        examAnswers[currentQuestionIndex] || [];
+
+    let multiHtml='';
+
+    qData.labels.forEach((label,index)=>{
+
+        multiHtml += `
+            <div style="
+                margin:18px 0;
+                display:flex;
+                align-items:center;
+                gap:12px;
+                flex-wrap:wrap;
+                margin-left:52px;
+            ">
+
+                <span style="
+                    font-size:18px;
+                ">
+                    ${label}
+                </span>
+
+                <input
+                    type="text"
+
+                    value="${saved[index] || ''}"
+
+                    oninput="
+                        saveMultiFillAnswer(
+                            ${index},
+                            this.value
+                        )
+                    "
+
+                    style="
+                        width:140px;
+                        height:42px;
+                        border:1px solid #cbd5e1;
+                        border-radius:8px;
+                        padding:0 10px;
+                        font-size:18px;
+                    "
+                >
+            </div>
+        `;
+    });
+
+    htmlHTML += multiHtml;
+}
+
+else if (qData.type === 'essay') {
+
+    const savedVal =
+        examAnswers[currentQuestionIndex] || '';
+
+    htmlHTML += `
+        <div
+            style="
+                margin-left:52px;
+                margin-top:20px;
+            ">
+
+            <textarea
+                oninput="saveEssayAnswer(this)"
+                style="
+                    width:100%;
+                    min-height:220px;
+                    padding:12px;
+                    border:1px solid #cbd5e1;
+                    border-radius:8px;
+                ">${savedVal}</textarea>
+
+        </div>
+    `;
+}
+else if(qData.type === 'dragdrop'){
+
+    const saved =
+        examAnswers[currentQuestionIndex] || {};
+
+    const usedChoices =
+        Object.values(saved);
+
+    let choicesHtml = `
+        <div style="
+            display:flex;
+            gap:12px;
+            margin-bottom:25px;
+            flex-wrap:wrap;
+        ">
+    `;
+
+    qData.choices.forEach(choice=>{
+
+        if(usedChoices.includes(choice)){
+            return;
         }
 
-        function changeQuestion(dir) {
+        choicesHtml += `
+            <div
+                draggable="true"
+
+                ondragstart="
+                    event.dataTransfer.setData(
+                        'text/plain',
+                        '${choice}'
+                    )
+                "
+
+                style="
+                    background:#1677ff;
+                    color:white;
+                    padding:12px 20px;
+                    border-radius:10px;
+                    cursor:grab;
+                    font-weight:700;
+                    user-select:none;
+                "
+            >
+                ${choice}
+            </div>
+        `;
+    });
+
+    choicesHtml += `</div>`;
+    let targetsHtml = '';
+
+    qData.targets.forEach((target,index)=>{
+
+        const val = saved[index] || '';
+
+        targetsHtml += `
+            <div style="
+                display:flex;
+                align-items:center;
+                gap:16px;
+                margin-bottom:20px;
+            ">
+
+                <div style="
+                    flex:1;
+                    font-size:18px;
+                    font-weight:600;
+                ">
+                    ${target}
+                </div>
+
+                <div
+                    ondragover="event.preventDefault()"
+
+                    ondrop="
+                        event.preventDefault();
+
+                        saveDragDropAnswer(
+                            ${index},
+                            event.dataTransfer.getData('text/plain')
+                        );
+                    "
+
+                    style="
+                        width:180px;
+                        min-height:60px;
+                        border:2px dashed #cbd5e1;
+                        border-radius:12px;
+                        background:white;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                    "
+                >
+
+                    ${
+                        val
+                        ?
+                        `
+                        <div
+                            draggable="true"
+
+                            ondragstart="
+                                event.dataTransfer.setData(
+                                    'text/plain',
+                                    '${val}'
+                                )
+                            "
+
+                            style="
+                                background:#1677ff;
+                                color:white;
+                                padding:10px 18px;
+                                border-radius:10px;
+                                font-weight:700;
+                                cursor:grab;
+                            "
+                        >
+                            ${val}
+                        </div>
+                        `
+                        :
+                        ''
+                    }
+
+                </div>
+
+            </div>
+        `;
+    });
+
+    htmlHTML += choicesHtml + targetsHtml;
+}
+else if (qData.type === 'matrix') {
+
+    const saved =
+        examAnswers[currentQuestionIndex] || {};
+
+    let rowsHtml = `
+        <table style="
+            width:100%;
+            border-collapse:collapse;
+            margin-top:20px;
+        ">
+            <tr>
+                <th style="border:1px solid #ddd;padding:12px">
+                </th>
+
+                <th style="
+                    border:1px solid #ddd;
+                    padding:12px;
+                    width:120px;
+                    text-align:center;
+                ">
+                    Sai
+                </th>
+
+                <th style="
+                    border:1px solid #ddd;
+                    padding:12px;
+                    width:120px;
+                    text-align:center;
+                ">
+                    Đúng
+                </th>
+            </tr>
+    `;
+
+    qData.rows.forEach((row,rowIndex)=>{
+
+        rowsHtml += `
+            <tr>
+
+                <td style="
+                    border:1px solid #ddd;
+                    padding:12px;
+                ">
+                    ${row}
+                </td>
+
+                <td style="
+                    border:1px solid #ddd;
+                    text-align:center;
+                ">
+                    <input
+                        type="radio"
+                        name="matrix_${rowIndex}"
+                        ${saved[rowIndex]==='Sai'?'checked':''}
+                        onchange="
+                            saveMatrixAnswer(
+                                ${rowIndex},
+                                'Sai'
+                            )
+                        ">
+                </td>
+
+                <td style="
+                    border:1px solid #ddd;
+                    text-align:center;
+                ">
+                    <input
+                        type="radio"
+                        name="matrix_${rowIndex}"
+                        ${saved[rowIndex]==='Đúng'?'checked':''}
+                        onchange="
+                            saveMatrixAnswer(
+                                ${rowIndex},
+                                'Đúng'
+                            )
+                        ">
+                </td>
+
+            </tr>
+        `;
+    });
+
+    rowsHtml += `</table>`;
+
+    htmlHTML += rowsHtml;
+}
+container.innerHTML = htmlHTML;
+
+if (window.MathJax) {
+
+    MathJax.typesetClear();
+
+    MathJax.typesetPromise([container]).then(() => {
+
+    }).catch(err => console.log(err));
+
+}
+    document.getElementById('btn-prev').disabled =
+        currentQuestionIndex === 0;
+
+    document.getElementById('btn-next').disabled =
+        currentQuestionIndex === questionsDataset.length - 1;
+
+    updateMatrixStatusStyles();
+}
+function changeQuestion
+(dir) {
             const nextIdx = currentQuestionIndex + dir;
             if (nextIdx >= 0 && nextIdx < questionsDataset.length) {
                 currentQuestionIndex = nextIdx;
@@ -486,43 +865,206 @@
                 globalTimeLeft--;
                 let mins = Math.floor(globalTimeLeft / 60);
                 let secs = globalTimeLeft % 60;
+               
                 document.getElementById('global-timer').innerText = `${mins < 10 ? '0'+mins : mins}:${secs < 10 ? '0'+secs : secs}`;
             }, 1000);
         }
 
-        function finishExam() {
-            clearInterval(globalTimerInterval);
-            
-            let correctCount = 0;
-            let wrongHTML = '';
+        
+function finishExam() {
 
-            questionsDataset.forEach((q, index) => {
-                const userAnswer = examAnswers[index] || "";
-                
-                if (userAnswer.toString().trim().toLowerCase() === q.correctAnswer.toString().trim().toLowerCase()) {
-                    correctCount++;
-                } else {
-                    wrongHTML += `
-                        <div class="wrong-item">
-                            <h4>Câu ${index + 1}</h4>
-                            <p><strong>Bạn chọn/điền:</strong> ${userAnswer === "" ? "<span style='color:#94a3b8'>Chưa làm</span>" : userAnswer}</p>
-                            <p><strong>Đáp án đúng:</strong> <span style="color:#059669; font-weight:700;">${q.correctAnswer}</span></p>
-                        </div>
-                    `;
-                }
-            });
+    clearInterval(globalTimerInterval);
 
-            document.getElementById('result-score-text').innerText = `${correctCount}/${questionsDataset.length}`;
-            
-            const wrongContainer = document.getElementById('wrong-answers-container');
-            if (correctCount === questionsDataset.length) {
-                wrongContainer.innerHTML = '<p style="color:#10b981; font-weight:600; font-size: 16px;">Tuyệt vời! Bạn đã trả lời đúng tất cả các câu hỏi.</p>';
-            } else {
-                wrongContainer.innerHTML = '<h4 style="margin-bottom:12px; color:var(--dark-navy);">Các câu trả lời sai:</h4>' + wrongHTML;
+    let correctCount = 0;
+
+    let wrongHTML = '';
+
+    questionsDataset.forEach((q, index) => {
+
+        const userAnswer =
+            examAnswers[index];
+
+        let isCorrect = false;
+
+        if (q.type === 'matrix') {
+
+            const ua = userAnswer || {};
+
+            const ca = q.correctAnswer || {};
+
+            isCorrect =
+                JSON.stringify(ua) ===
+                JSON.stringify(ca);
+        }
+else if (q.type === 'dragdrop') {
+
+    const ua = userAnswer || {};
+    const ca = q.correctAnswer || {};
+
+    isCorrect =
+        JSON.stringify(ua) ===
+        JSON.stringify(ca);
+}
+
+else if (q.type === 'fillmulti') {
+
+    const ua = userAnswer || [];
+    const ca = q.correctAnswer || [];
+
+    isCorrect =
+        JSON.stringify(ua) ===
+        JSON.stringify(ca);
+}
+
+        else if (q.type === 'essay') {
+
+            isCorrect = false;
+        }
+
+
+        else {
+
+            isCorrect =
+                String(userAnswer || '')
+                    .trim()
+                    .toLowerCase() ===
+
+                String(q.correctAnswer || '')
+                    .trim()
+                    .toLowerCase();
+        }
+
+        if (isCorrect) {
+
+            correctCount++;
+        }
+        else {
+
+            let userDisplay;
+
+            if (Array.isArray(userAnswer)) {
+
+                userDisplay =
+                    userAnswer.join(', ');
+            }
+            else if (
+                typeof userAnswer === 'object' &&
+                userAnswer !== null
+            ) {
+
+                userDisplay =
+                    JSON.stringify(userAnswer);
+            }
+            else {
+
+                userDisplay =
+                    userAnswer ||
+                    "<span style='color:#94a3b8'>Chưa làm</span>";
             }
 
-            showStep(4);
+            const correctDisplay =
+                typeof q.correctAnswer === 'object'
+                    ? JSON.stringify(q.correctAnswer)
+                    : q.correctAnswer;
+
+            wrongHTML += `
+            <div class="wrong-item">
+
+                <h4>
+                    Câu ${index + 1}
+                </h4>
+
+                <p>
+                    <strong>Bạn trả lời:</strong>
+                    ${userDisplay}
+                </p>
+
+                <p>
+                    <strong>Đáp án đúng:</strong>
+                    ${correctDisplay}
+                </p>
+
+            </div>
+            `;
         }
-    </script>
+    });
+
+    document.getElementById(
+        'result-score-text'
+    ).innerText =
+        `${correctCount}/${questionsDataset.length}`;
+
+    document.getElementById(
+        'wrong-answers-container'
+    ).innerHTML =
+        wrongHTML ||
+        '<p style="color:#10b981;font-weight:700;">Hoàn hảo!</p>';
+
+    showStep(4);
+}
+    
+/* TSA ADVANCED QUESTION TYPES */
+
+function toggleMultiAnswer(letter) {
+
+    if (!examAnswers[currentQuestionIndex]) {
+        examAnswers[currentQuestionIndex] = [];
+    }
+
+    let arr = examAnswers[currentQuestionIndex];
+
+    if (arr.includes(letter)) {
+        arr = arr.filter(x => x !== letter);
+    } else {
+        arr.push(letter);
+    }
+
+    examAnswers[currentQuestionIndex] = arr;
+
+    updateMatrixStatusStyles();
+    renderCurrentQuestion();
+}
+
+function saveEssayAnswer(el) {
+
+    examAnswers[currentQuestionIndex] = el.value;
+
+    updateMatrixStatusStyles();
+}
+
+function saveMatrixAnswer(rowIndex, value) {
+
+    if (!examAnswers[currentQuestionIndex]) {
+        examAnswers[currentQuestionIndex] = {};
+    }
+
+    examAnswers[currentQuestionIndex][rowIndex] = value;
+
+    updateMatrixStatusStyles();
+}
+
+function saveDragDropAnswer(index, value) {
+
+    if (!examAnswers[currentQuestionIndex]) {
+        examAnswers[currentQuestionIndex] = {};
+    }
+
+    examAnswers[currentQuestionIndex][index] = value;
+
+    updateMatrixStatusStyles();
+
+    renderCurrentQuestion();
+}
+function saveMultiFillAnswer(index,value){
+
+    if(!examAnswers[currentQuestionIndex]){
+        examAnswers[currentQuestionIndex]=[];
+    }
+
+    examAnswers[currentQuestionIndex][index]=value;
+
+    updateMatrixStatusStyles();
+}
+</script>
 </body>
 </html>
