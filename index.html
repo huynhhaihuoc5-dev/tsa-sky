@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TSA SKY - Độc lập tư duy Nâng tầm tri thức</title>
+    <!-- Phông chữ chuẩn hiện đại -->
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Thư viện Icon điện tử siêu sắc nét -->
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     
     <style>
@@ -356,32 +358,35 @@
             margin-bottom: 26px;
         }
 
-        /* --- RESPONSIVE PHẦN THAY ĐỔI ĐỂ SỬA LỖI TRÊN ĐIỆN THOẠI --- */
+        /* --- RESPONSIVE MOBILE TỐI ƯU HIỆU QUẢ NHẤT --- */
         @media (max-width: 992px) {
+            /* SỬA LỖI ĐÈ CHỮ: Đổ dải màu xanh da trời nhạt đặc (gần giống màu trời của ảnh) chiếm 55% phía trên để che hẳn phần đầu máy bay, bảo vệ không gian cho chữ hiển thị. Máy bay được đẩy xuống dưới đáy */
             .hero { 
-                background-position: center center; 
-                padding: 40px 0; 
+                background-image: linear-gradient(to bottom, #EDF5FF 0%, #EDF5FF 55%, rgba(237, 245, 255, 0.6) 75%, transparent 100%), url('assets/images/hero-bg.jpg');
+                background-position: center bottom; 
+                background-size: cover;
+                padding: 50px 0; 
             }
             .hero-fluid-container { 
-                padding-left: 16px; 
-                padding-right: 16px; 
+                padding-left: 24px; 
+                padding-right: 24px; 
             }
             
-            /* SỬA LỖI TẠI ĐÂY: Thêm nền kính mờ trắng giúp tách biệt chữ đen khỏi chi tiết máy bay */
             .hero-text { 
                 max-width: 100%; 
                 text-align: center; 
                 align-items: center; 
-                background: rgba(255, 255, 255, 0.92); /* Lớp nền trắng mờ chặn đè lên máy bay */
-                padding: 32px 24px;
-                border-radius: 20px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-                backdrop-filter: blur(10px); /* Làm nhòe background phía sau nền kính */
-                -webkit-backdrop-filter: blur(10px);
+            }
+
+            /* Tăng độ tương phản chữ mô tả lên mức tối đa */
+            .hero-text .hero-desc {
+                color: #0F172A !important; /* Đổi sang màu đen xám đậm sắc nét */
+                font-weight: 600 !important; /* Tăng độ dày chữ */
+                text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); /* Tạo viền sáng nhẹ phía sau chữ */
             }
             
             .hero-buttons { justify-content: center; }
-            .hero-stats { justify-content: center; flex-wrap: wrap; gap: 20px; }
+            .hero-stats { justify-content: center; flex-wrap: wrap; }
             .features { grid-template-columns: repeat(2, 1fr); }
             .countdown { flex-direction: column; gap: 30px; text-align: center; }
             .countdown-info { flex-direction: column; }
@@ -391,9 +396,8 @@
             .features { grid-template-columns: 1fr; }
             .header-content { flex-direction: column; gap: 16px; }
             .nav-list { flex-wrap: wrap; justify-content: center; gap: 16px; }
-            .hero-title { font-size: 30px; } /* Giảm kích thước xíu nữa cho vừa màn hình điện thoại nhỏ */
+            .hero-title { font-size: 32px; }
             
-            /* Chuyển các nút thành hàng dọc trên điện thoại siêu nhỏ để không bị bóp méo méo chữ */
             .hero-buttons {
                 flex-direction: column;
                 gap: 12px;
@@ -402,13 +406,13 @@
             .btn-main, .btn-sub {
                 width: 100%;
                 justify-content: center;
-                padding: 14px 24px;
             }
         }
     </style>
 </head>
 <body>
 
+    <!-- NAVBAR HEADER -->
     <header class="header">
         <div class="container header-content">
             <a href="#" class="logo-container">
@@ -433,6 +437,7 @@
         </div>
     </header>
 
+    <!-- HERO SECTION -->
     <section class="hero">
         <div class="hero-fluid-container">
             <div class="hero-text">
@@ -473,6 +478,7 @@
     </section>
 
     <main class="container">
+        <!-- FEATURES SECTION -->
         <section class="features">
             <div class="feature-card">
                 <div class="feature-icon-wrapper">
@@ -512,6 +518,7 @@
             </div>
         </section>
 
+        <!-- COUNTDOWN SECTION -->
         <section class="countdown">
             <div class="countdown-info">
                 <div class="calendar-icon-box">
