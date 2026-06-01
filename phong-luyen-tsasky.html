@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phòng luyện Thi - TSA SKY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    
+    <script src="data/exam-list.js"></script>
+
+    <style>
+        :root {
+            --primary-blue: #1677FF;
+            --gradient-blue: linear-gradient(135deg, #0052D4 0%, #4364F7 50%, #6FB1FC 100%);
+            --dark-navy: #051A39;
+            --bg-grid: #f8fafc;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --q-font-size: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Be Vietnam Pro', sans-serif; }
+        body { background-color: var(--bg-grid); background-image: radial-gradient(#e2e8f0 1.5px, transparent 1.5px); background-size: 24px 24px; color: var(--text-dark); min-height: 100vh; }
+        
+        .step-view { display: none; }
+        .step-view.active { display: block; }
+
+        /* Sảnh chọn đề */
+        .lobby-container { max-width: 900px; margin: 0 auto; padding: 60px 20px; }
+        .exam-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px; margin-top: 40px; }
+        .exam-card { background: #ffffff; border-radius: 16px; padding: 24px; border: 1px solid var(--border-color); cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(5, 26, 57, 0.02); position: relative; }
+        .exam-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(22, 119, 255, 0.1); border-color: #bae0ff; }
+        .exam-card h3 { font-size: 20px; color: var(--dark-navy); margin-bottom: 8px; }
+        .exam-card .exam-meta { color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+        
+        /* Box xác nhận Auth */
+        .auth-container { display: flex; justify-content: center; align-items: center; min-height: 85vh; padding: 20px; }
+        .auth-card { background: #ffffff; width: 100%; max-width: 580px; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(5, 26, 57, 0.05); border: 1px solid var(--border-color); }
+        .tsa-brand-header { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 36px; }
+        .tsa-logo-text { font-size: 40px; font-weight: 800; color: var(--dark-navy); }
+        .tsa-input { width: 100%; padding: 16px; font-size: 20px; font-weight: 600; text-align: center; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; margin-bottom: 24px;}
+        .tsa-btn { width: 100%; background: var(--gradient-blue); color: white; border: none; padding: 16px; font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; transition: opacity 0.2s; }
+        .tsa-btn:hover { opacity: 0.95; }
+        
+        .info-table { width: 100%; margin-bottom: 24px; }
+        .info-row { display: flex; padding: 12px 0; font-size: 15px; border-bottom: 1px dashed #f1f5f9; }
+        .info-label { width: 40%; color: var(--text-muted); font-weight: 500; }
+        .info-value { width: 60%; color: var(--dark-navy); font-weight: 600; }
+        
+        /* Giao diện làm bài */
+        .exam-header { background: var(--dark-navy); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; color: white; }
+        .exam-workspace { display: grid; grid-template-columns: 1fr 340px; height: calc(100vh - 70px); }
+        
+        .question-panel { background: #fff; margin: 16px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .q-toolbar { background: #f8fafc; border-bottom: 1px solid var(--border-color); padding: 8px 24px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+        .font-btn { background: white; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; font-weight: 700; cursor: pointer; }
+        .question-scroll-content { padding: 24px; overflow-y: auto; flex-grow: 1; }
+        .question-header-row { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
+        .question-number-badge { background: #e6f4ff; color: var(--primary-blue); font-weight: 700; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #bae0ff; font-size: 15px; }
+        .question-main-text { font-size: var(--q-font-size); line-height: 1.7; font-weight: 500; color: #1e293b; }
+        
+        /* Trắc nghiệm Clickable */
+        .mcq-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; margin-bottom: 24px; }
+        .mcq-option { background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px 16px; border-radius: 8px; font-weight: 600; color: var(--dark-navy); text-align: left; transition: all 0.2s; cursor: pointer; }
+        .mcq-option:hover { background: #e6f4ff; border-color: var(--primary-blue); }
+        .mcq-option.selected {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+            box-shadow: 0 4px 10px rgba(22, 119, 255, 0.3);
+        }
+
+        .fill-input { border: none; border-bottom: 2px solid var(--primary-blue); width: 150px; text-align: center; font-weight: 700; font-size: var(--q-font-size); color: var(--primary-blue); outline: none; padding: 4px; background: #f8fafc; }
+
+        .bottom-nav-bar { background: #fff; border-top: 1px solid var(--border-color); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+        .btn-nav-arrow { background: var(--dark-navy); color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .btn-nav-arrow:disabled { background: #cbd5e1; cursor: not-allowed; }
+        
+        /* Sidebar Menu */
+        .sidebar-panel { background: #fff; border-left: 1px solid var(--border-color); padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        .global-timer-row { display: flex; justify-content: space-between; align-items: center; }
+        .timer-countdown-text { font-size: 24px; font-weight: 700; color: var(--dark-navy); }
+        .btn-submit-exam { background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-submit-exam:hover { background: #059669; }
+
+        .questions-matrix { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .matrix-cell { aspect-ratio: 1; background: #fff; border: 1px solid #cbd5e1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #64748b; cursor: pointer; transition: 0.15s; }
+        .matrix-cell.active { background: var(--dark-navy); color: #fff; border-color: var(--dark-navy); }
+        .matrix-cell.filled { background: #e0f2fe; color: #0369a1; border-color: #0369a1; }
+        
+        .progress-block { margin-top: auto; border-top: 1px solid #f1f5f9; padding-top: 16px; }
+        .progress-bar-bg { background: #e2e8f0; height: 6px; border-radius: 3px; overflow: hidden; margin: 8px 0; }
+        .progress-bar-fill { background: var(--primary-blue); width: 0%; height: 100%; transition: width 0.3s; }
+
+        /* Bảng kết quả */
+        .result-score { font-size: 48px; font-weight: 800; color: var(--primary-blue); text-align: center; margin: 16px 0; }
+        .wrong-list { margin-top: 24px; max-height: 300px; overflow-y: auto; text-align: left; }
+        .wrong-item { background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+        .wrong-item h4 { color: #b91c1c; font-size: 15px; margin-bottom: 4px; }
+        .wrong-item p { font-size: 14px; color: #475569; }
+        .wrong-item strong { color: #1e293b; }
+
+    </style>
+</head>
+<body>
+
+    <div id="step-0" class="step-view active">
+        <div class="lobby-container">
+            <div class="tsa-brand-header">
+                <div class="tsa-logo-text" style="font-size: 44px;">TSA SKY</div>
+            </div>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h1 style="color: var(--dark-navy); font-size: 24px;">Hệ thống Phòng Luyện Thông Minh</h1>
+                <p style="color: var(--text-muted); margin-top: 8px;">Vui lòng chọn một đề thi để bắt đầu làm bài</p>
+            </div>
+            <div class="exam-list-grid" id="exam-lobby-grid"></div>
+        </div>
+    </div>
+
+    <div id="step-1" class="step-view">
+        <div class="auth-container">
+            <div class="auth-card">
+                <a onclick="showStep(0)" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; color:var(--text-muted); font-weight:600; font-size:14px; margin-bottom: 24px;">
+                    <iconify-icon icon="lucide:arrow-left"></iconify-icon> Trở về Sảnh
+                </a>
+                <div class="tsa-brand-header"><div class="tsa-logo-text">TSA SKY</div></div>
+                <div class="form-group" style="text-align: center;">
+                    <label style="display:block; font-weight:600; color:#475569; margin-bottom:12px;">Mã đề thi</label>
+                    <input type="text" class="tsa-input" id="exam-code" readonly>
+                </div>
+                <button class="tsa-btn" onclick="goToStep2()">Tiếp theo</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="step-2" class="step-view">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="tsa-brand-header"><div class="tsa-logo-text">TSA SKY</div></div>
+                <h3 style="text-align:center; font-size:22px; font-weight:700; color:var(--dark-navy); margin-bottom:24px;">Xác nhận thông tin kíp thi</h3>
+                <div class="info-table">
+                    <div class="info-row"><div class="info-label">Tên bài thi</div><div class="info-value" id="confirm-exam-name"></div></div>
+                    <div class="info-row"><div class="info-label">Mã đề</div><div class="info-value" id="confirm-exam-code"></div></div>
+                    <div class="info-row"><div class="info-label">Thời gian</div><div class="info-value" id="confirm-exam-time"></div></div>
+                </div>
+                <div style="font-size: 14px; color: #0f172a; font-style: italic; margin-bottom: 24px; line-height: 1.5;">
+                    Lưu ý: Bằng việc nhấn nút "Bắt đầu thi" hệ thống TSA SKY sẽ kích hoạt tính giờ làm bài tự động.
+                </div>
+                <button class="tsa-btn" onclick="goToStep3()">Bắt đầu thi</button>
+                <a style="display: block; text-align: left; color: #64748b; text-decoration: none; font-weight: 600; margin-top: 16px; font-size: 14px; cursor: pointer;" onclick="showStep(1)"><iconify-icon icon="lucide:arrow-left"></iconify-icon> Quay lại</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="step-3" class="step-view">
+        <div class="exam-header">
+            <div style="display:flex; align-items:center; gap: 12px;">
+                <div class="tsa-logo-text" style="color:white; font-size:24px;">TSA SKY</div>
+                <div id="workspace-exam-code" style="font-weight:700; font-size:15px; color:#cbd5e1; border-left:2px solid #475569; padding-left:12px;"></div>
+            </div>
+        </div>
+        <div class="exam-workspace">
+            <div class="question-panel">
+                <div class="q-toolbar">
+                    <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Cỡ chữ đề thi:</span>
+                    <button class="font-btn" onclick="changeFontSize(-2)">A-</button>
+                    <button class="font-btn" onclick="changeFontSize(2)">A+</button>
+                </div>
+                
+                <div class="question-scroll-content" id="question-display-container"></div>
+                
+                <div class="bottom-nav-bar">
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-nav-arrow" id="btn-prev" onclick="changeQuestion(-1)">
+                            <iconify-icon icon="lucide:chevron-left"></iconify-icon> Câu trước
+                        </button>
+                        <button class="btn-nav-arrow" id="btn-next" onclick="changeQuestion(1)" style="background: var(--primary-blue);">
+                            Câu tiếp <iconify-icon icon="lucide:chevron-right"></iconify-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-panel">
+                <div class="global-timer-row">
+                    <div>
+                        <div style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Thời gian còn lại</div>
+                        <div class="timer-countdown-text" id="global-timer">00:00</div>
+                    </div>
+                    <button class="btn-submit-exam" onclick="finishExam()">Nộp bài</button>
+                </div>
+
+                <div>
+                    <div style="display: flex; gap: 12px; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px;">
+                        <span><span style="width:12px; height:12px; border-radius:50%; display:inline-block; background:var(--dark-navy); vertical-align:middle;"></span> Đang xem</span>
+                        <span><span style="width:12px; height:12px; border-radius:50%; display:inline-block; background:#e0f2fe; vertical-align:middle;"></span> Đã điền</span>
+                    </div>
+                    <div class="questions-matrix" id="matrix-container"></div>
+                </div>
+                
+                <div class="progress-block">
+                    <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold; margin-bottom: 6px;">
+                        <span>Tiến độ bài làm</span><span id="progress-ratio">0/0</span>
+                    </div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar-fill"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="step-4" class="step-view">
+        <div class="auth-container">
+            <div class="auth-card" style="max-width: 650px; text-align: center;">
+                <div class="tsa-brand-header"><div class="tsa-logo-text">TSA SKY</div></div>
+                <h3 style="color: var(--dark-navy); font-size: 24px;">Hoàn thành bài thi!</h3>
+                <p style="color: var(--text-muted); margin-top: 8px;">Số câu trả lời đúng của bạn:</p>
+                
+                <div class="result-score" id="result-score-text">0/0</div>
+                
+                <div class="wrong-list" id="wrong-answers-container">
+                    </div>
+
+                <button class="tsa-btn" style="margin-top: 24px;" onclick="location.reload()">Quay lại sảnh chính</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentExamInfo = {};
+        let questionsDataset = [];
+        let currentQuestionIndex = 0;
+        let examAnswers = {}; 
+        let globalTimeLeft = 0;
+        let globalTimerInterval;
+        let currentFontSize = 16; 
+
+        // Khởi tạo Sảnh chờ từ file data/exam-list.js
+        window.onload = function() {
+            const lobbyGrid = document.getElementById('exam-lobby-grid');
+            lobbyGrid.innerHTML = '';
+            
+            // Kiểm tra xem biến examLobbyList đã được file JS load lên chưa
+            if (typeof examLobbyList !== 'undefined') {
+                examLobbyList.forEach(exam => {
+                    lobbyGrid.innerHTML += `
+                        <div class="exam-card" onclick="selectExam('${exam.id}', '${exam.fileUrl}')">
+                            <h3>${exam.name}</h3>
+                            <div class="exam-meta"><iconify-icon icon="lucide:hash"></iconify-icon> Mã đề: ${exam.code}</div>
+                            <div class="exam-meta"><iconify-icon icon="lucide:clock"></iconify-icon> Thời gian: ${exam.timeMinutes} phút</div>
+                        </div>
+                    `;
+                });
+            } else {
+                lobbyGrid.innerHTML = '<p style="color: red; font-weight: bold;">Lỗi: Chưa tìm thấy dữ liệu đề thi. Bạn đã tạo thư mục data và file exam-list.js chưa?</p>';
+            }
+        };
+
+        function changeFontSize(step) {
+            currentFontSize += step;
+            if(currentFontSize < 12) currentFontSize = 12;
+            if(currentFontSize > 30) currentFontSize = 30;
+            document.documentElement.style.setProperty('--q-font-size', currentFontSize + 'px');
+        }
+
+        function showStep(stepNum) {
+            document.querySelectorAll('.step-view').forEach(view => view.classList.remove('active'));
+            document.getElementById(`step-${stepNum}`).classList.add('active');
+        }
+
+        // Tải file JS động
+        function loadExamScript(fileUrl, callback) {
+            if (document.querySelector(`script[src="${fileUrl}"]`)) {
+                callback();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = fileUrl;
+            script.onload = callback;
+            document.body.appendChild(script);
+        }
+
+        function selectExam(examId, fileUrl) {
+            examAnswers = {};
+            currentQuestionIndex = 0;
+            
+            // Lấy thông tin cơ bản từ Sảnh
+            currentExamInfo = examLobbyList.find(e => e.id === examId);
+            
+            document.getElementById('exam-code').value = "Đang tải dữ liệu...";
+            showStep(1);
+
+            // Tải file đề tương ứng lên
+            loadExamScript(fileUrl, function() {
+                questionsDataset = window.examQuestionsData[examId];
+                document.getElementById('exam-code').value = currentExamInfo.code;
+            });
+        }
+
+        function goToStep2() {
+            document.getElementById('confirm-exam-name').innerText = currentExamInfo.name;
+            document.getElementById('confirm-exam-code').innerText = currentExamInfo.code;
+            document.getElementById('confirm-exam-time').innerText = `${currentExamInfo.timeMinutes} phút`;
+            showStep(2);
+        }
+        
+        function goToStep3() {
+            document.getElementById('workspace-exam-code').innerText = `MÃ ĐỀ: ${currentExamInfo.code}`;
+            globalTimeLeft = currentExamInfo.timeMinutes * 60; 
+            showStep(3);
+            initMatrixGrid();
+            renderCurrentQuestion();
+            startCountingTimers();
+        }
+
+        function initMatrixGrid() {
+            const matrixContainer = document.getElementById('matrix-container');
+            matrixContainer.innerHTML = '';
+            for(let i = 0; i < questionsDataset.length; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'matrix-cell';
+                cell.innerText = i + 1;
+                cell.onclick = () => { currentQuestionIndex = i; renderCurrentQuestion(); };
+                matrixContainer.appendChild(cell);
+            }
+            updateMatrixStatusStyles();
+        }
+
+        function updateMatrixStatusStyles() {
+            const cells = document.querySelectorAll('.matrix-cell');
+            let completedCount = 0;
+
+            cells.forEach((cell, idx) => {
+                cell.classList.remove('active', 'filled');
+                if (idx === currentQuestionIndex) cell.classList.add('active');
+                if (examAnswers[idx] && examAnswers[idx] !== "") {
+                    cell.classList.add('filled');
+                    completedCount++;
+                }
+            });
+
+            const total = questionsDataset.length;
+            const percentage = Math.round((completedCount / total) * 100) || 0;
+            document.getElementById('progress-ratio').innerText = `${completedCount}/${total} câu`;
+            document.getElementById('progress-bar-fill').style.width = `${percentage}%`;
+        }
+
+        // Xử lý click chọn đáp án (Trắc nghiệm)
+        function selectMCQOption(answerKey) {
+            examAnswers[currentQuestionIndex] = answerKey;
+            renderCurrentQuestion();
+            updateMatrixStatusStyles();
+        }
+
+        // Xử lý nhập đáp án (Điền khuyết)
+        function saveFillAnswer(inputEl) {
+            if(inputEl.value.trim() !== "") {
+                examAnswers[currentQuestionIndex] = inputEl.value.trim();
+            } else {
+                delete examAnswers[currentQuestionIndex];
+            }
+            updateMatrixStatusStyles();
+        }
+
+        function renderCurrentQuestion() {
+            const container = document.getElementById('question-display-container');
+            if (!questionsDataset || questionsDataset.length === 0) return;
+            
+            const qData = questionsDataset[currentQuestionIndex];
+            let htmlHTML = `
+                <div class="question-header-row">
+                    <div class="question-number-badge">${currentQuestionIndex + 1}</div>
+                    <div class="question-main-text">${qData.text.replace(/\n/g, '<br>')}</div>
+                </div>
+            `;
+
+            // RENDER TRẮC NGHIỆM
+            if (qData.type === 'mcq' && qData.options) {
+                const letters = ['A', 'B', 'C', 'D'];
+                let optionsHtml = '';
+                
+                qData.options.forEach((optText, idx) => {
+                    const letter = letters[idx];
+                    const isSelected = examAnswers[currentQuestionIndex] === letter;
+                    const activeClass = isSelected ? 'selected' : '';
+                    
+                    optionsHtml += `
+                        <div class="mcq-option ${activeClass}" onclick="selectMCQOption('${letter}')">
+                            ${optText}
+                        </div>`;
+                });
+                htmlHTML += `<div class="mcq-row">${optionsHtml}</div>`;
+            } 
+            // RENDER ĐIỀN KHUYẾT
+            else if (qData.type === 'fill') {
+                const savedVal = examAnswers[currentQuestionIndex] || '';
+                htmlHTML += `
+                    <div style="margin-left: 52px; margin-top: 20px;">
+                        <span style="font-weight:600; color: var(--dark-navy);">Nhập đáp án của bạn: </span>
+                        <input type="text" class="fill-input" value="${savedVal}" oninput="saveFillAnswer(this)">
+                    </div>
+                `;
+            }
+
+            container.innerHTML = htmlHTML;
+            document.getElementById('btn-prev').disabled = (currentQuestionIndex === 0);
+            document.getElementById('btn-next').disabled = (currentQuestionIndex === questionsDataset.length - 1);
+            updateMatrixStatusStyles();
+        }
+
+        function changeQuestion(dir) {
+            const nextIdx = currentQuestionIndex + dir;
+            if (nextIdx >= 0 && nextIdx < questionsDataset.length) {
+                currentQuestionIndex = nextIdx;
+                renderCurrentQuestion();
+            }
+        }
+
+        function startCountingTimers() {
+            if(globalTimerInterval) clearInterval(globalTimerInterval);
+            globalTimerInterval = setInterval(() => {
+                if (globalTimeLeft <= 0) { finishExam(); return; }
+                globalTimeLeft--;
+                let mins = Math.floor(globalTimeLeft / 60);
+                let secs = globalTimeLeft % 60;
+                document.getElementById('global-timer').innerText = `${mins < 10 ? '0'+mins : mins}:${secs < 10 ? '0'+secs : secs}`;
+            }, 1000);
+        }
+
+        // Nộp bài, chấm điểm
+        function finishExam() {
+            clearInterval(globalTimerInterval);
+            
+            let correctCount = 0;
+            let wrongHTML = '';
+
+            questionsDataset.forEach((q, index) => {
+                const userAnswer = examAnswers[index] || "";
+                
+                // So sánh đáp án (không phân biệt hoa/thường)
+                if (userAnswer.toString().trim().toLowerCase() === q.correctAnswer.toString().trim().toLowerCase()) {
+                    correctCount++;
+                } else {
+                    wrongHTML += `
+                        <div class="wrong-item">
+                            <h4>Câu ${index + 1}</h4>
+                            <p><strong>Bạn chọn/điền:</strong> ${userAnswer === "" ? "<span style='color:#94a3b8'>Chưa làm</span>" : userAnswer}</p>
+                            <p><strong>Đáp án đúng:</strong> <span style="color:#059669; font-weight:700;">${q.correctAnswer}</span></p>
+                        </div>
+                    `;
+                }
+            });
+
+            document.getElementById('result-score-text').innerText = `${correctCount}/${questionsDataset.length}`;
+            
+            const wrongContainer = document.getElementById('wrong-answers-container');
+            if (correctCount === questionsDataset.length) {
+                wrongContainer.innerHTML = '<p style="color:#10b981; font-weight:600; font-size: 16px;">Tuyệt vời! Bạn đã trả lời đúng tất cả các câu hỏi.</p>';
+            } else {
+                wrongContainer.innerHTML = '<h4 style="margin-bottom:12px; color:var(--dark-navy);">Các câu trả lời sai:</h4>' + wrongHTML;
+            }
+
+            showStep(4);
+        }
+    </script>
+</body>
+</html>
