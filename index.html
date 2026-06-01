@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TSA SKY - Độc lập tư duy Nâng tầm tri thức</title>
+    <title>SKY EDU - Độc lập tư duy Nâng tầm tri thức</title>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     
@@ -30,7 +30,6 @@
             overflow-x: hidden;
         }
 
-        /* Khung giới hạn chuẩn cho các phần chung */
         .container {
             max-width: 1340px;
             margin: 0 auto;
@@ -356,33 +355,17 @@
             margin-bottom: 26px;
         }
 
-        /* --- RESPONSIVE MOBILE TỐI ƯU HIỆU QUẢ NHẤT --- */
+        /* --- RESPONSIVE --- */
         @media (max-width: 992px) {
-            /* SỬA LỖI ĐÈ CHỮ: Đổ dải màu xanh da trời nhạt đặc (gần giống màu trời của ảnh) chiếm 55% phía trên để che hẳn phần đầu máy bay, bảo vệ không gian cho chữ hiển thị. Máy bay được đẩy xuống dưới đáy */
             .hero { 
                 background-image: linear-gradient(to bottom, #EDF5FF 0%, #EDF5FF 55%, rgba(237, 245, 255, 0.6) 75%, transparent 100%), url('assets/images/hero-bg.jpg');
                 background-position: center bottom; 
                 background-size: cover;
                 padding: 50px 0; 
             }
-            .hero-fluid-container { 
-                padding-left: 24px; 
-                padding-right: 24px; 
-            }
-            
-            .hero-text { 
-                max-width: 100%; 
-                text-align: center; 
-                align-items: center; 
-            }
-
-            /* Tăng độ tương phản chữ mô tả lên mức tối đa */
-            .hero-text .hero-desc {
-                color: #0F172A !important; /* Đổi sang màu đen xám đậm sắc nét */
-                font-weight: 600 !important; /* Tăng độ dày chữ */
-                text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); /* Tạo viền sáng nhẹ phía sau chữ */
-            }
-            
+            .hero-fluid-container { padding-left: 24px; padding-right: 24px; }
+            .hero-text { max-width: 100%; text-align: center; align-items: center; }
+            .hero-text .hero-desc { color: #0F172A !important; font-weight: 600 !important; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); }
             .hero-buttons { justify-content: center; }
             .hero-stats { justify-content: center; flex-wrap: wrap; }
             .features { grid-template-columns: repeat(2, 1fr); }
@@ -395,16 +378,8 @@
             .header-content { flex-direction: column; gap: 16px; }
             .nav-list { flex-wrap: wrap; justify-content: center; gap: 16px; }
             .hero-title { font-size: 32px; }
-            
-            .hero-buttons {
-                flex-direction: column;
-                gap: 12px;
-                width: 100%;
-            }
-            .btn-main, .btn-sub {
-                width: 100%;
-                justify-content: center;
-            }
+            .hero-buttons { flex-direction: column; gap: 12px; width: 100%; }
+            .btn-main, .btn-sub { width: 100%; justify-content: center; }
         }
     </style>
 </head>
@@ -418,14 +393,15 @@
                     <path d="M10 26C14 26 18 23 21 19C22.5 17 24 14 25 11C21 12 18 13.5 16 15C12 18 10 22 10 26Z" fill="#1677FF"/>
                 </svg>
                 <div class="logo-text">
-                    <div class="logo-title">TSA SKY</div>
+                    <div class="logo-title">SKY EDU</div>
                     <div class="logo-subtitle">Fly higher - Think better</div>
                 </div>
             </a>
             <nav>
                 <ul class="nav-list">
                     <li><a href="#">Quy đổi điểm</a></li>
-                    <li><a href="phong-luyen-tsasky.html">Phòng luyện</a></li>
+                    <li><a href="phong-luyen-tsa.html">Phòng luyện TSA</a></li>
+                    <li><a href="phong-luyen-hsa.html">Phòng luyện HSA</a></li>
                     <li><a href="#">Khóa học</a></li>
                     <li><a href="#">Đăng nhập</a></li>
                     <li><a href="#" class="btn-signup"><iconify-icon icon="lucide:user-plus"></iconify-icon> Đăng ký</a></li>
@@ -437,9 +413,9 @@
     <section class="hero">
         <div class="hero-fluid-container">
             <div class="hero-text">
-                <div class="badge">HỆ THỐNG TSA SKY</div>
+                <div class="badge">HỆ THỐNG SKY EDU</div>
                 <h1 class="hero-title">ĐỘC LẬP TƯ DUY <br> <span>NÂNG TẦM TRI THỨC</span></h1>
-                <p class="hero-desc">TSA SKY đồng hành cùng thế hệ trẻ Việt Nam chinh phục kỳ thi đánh giá tư duy, mở rộng cánh cửa tri thức và tương lai.</p>
+                <p class="hero-desc">SKY EDU đồng hành cùng thế hệ trẻ Việt Nam chinh phục kỳ thi đánh giá tư duy, mở rộng cánh cửa tri thức và tương lai.</p>
                 
                 <div class="hero-buttons">
                     <a href="#" class="btn-main">Đăng ký ngay <iconify-icon icon="lucide:arrow-right"></iconify-icon></a>
@@ -519,7 +495,7 @@
                     <iconify-icon icon="lucide:calendar-days" style="font-size: 54px;"></iconify-icon>
                 </div>
                 <div class="countdown-text">
-                    <h3>ĐẾM NGƯỢC NGÀY THI CHÍNH THỨC <br> TSA SKY ĐỢT KẾ TIẾP 2026</h3>
+                    <h3>ĐẾM NGƯỢC NGÀY THI CHÍNH THỨC <br> SKY EDU ĐỢT KẾ TIẾP 2026</h3>
                     <p><iconify-icon icon="lucide:calendar"></iconify-icon> Ngày thi dự kiến: 15/12/2026</p>
                 </div>
             </div>
