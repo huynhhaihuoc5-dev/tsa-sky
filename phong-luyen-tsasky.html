@@ -102,6 +102,65 @@
         .wrong-item p { font-size: 14px; color: #475569; }
         .wrong-item strong { color: #1e293b; }
 
+        /* --- GIAO DIỆN DÀNH CHO ĐIỆN THOẠI (MOBILE RESPONSIVE TỐI ƯU CUỘN) --- */
+        @media (max-width: 850px) {
+            body, html {
+                height: auto;
+                overflow-y: auto;
+            }
+            
+            .exam-workspace {
+                display: flex;
+                flex-direction: column;
+                height: auto; 
+            }
+            
+            .question-panel {
+                margin: 0;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                height: auto; 
+                overflow: visible; 
+            }
+            
+            .question-scroll-content {
+                overflow-y: visible; 
+                height: auto;
+                padding: 20px 16px;
+            }
+            
+            .bottom-nav-bar {
+                position: sticky;
+                bottom: 0;
+                z-index: 100;
+                background: #ffffff;
+                box-shadow: 0 -4px 15px rgba(5, 26, 57, 0.08);
+                padding: 12px 16px;
+            }
+
+            .sidebar-panel {
+                border-left: none;
+                border-top: 6px solid var(--border-color);
+                padding: 24px 16px;
+                height: auto;
+            }
+            
+            .mcq-row {
+                grid-template-columns: 1fr; 
+                gap: 12px;
+            }
+            
+            .exam-list-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-card {
+                padding: 24px 16px;
+                margin: 16px;
+                width: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -236,12 +295,10 @@
         let globalTimerInterval;
         let currentFontSize = 16; 
 
-        // Khởi tạo Sảnh chờ từ file data/exam-list.js
         window.onload = function() {
             const lobbyGrid = document.getElementById('exam-lobby-grid');
             lobbyGrid.innerHTML = '';
             
-            // Kiểm tra xem biến examLobbyList đã được file JS load lên chưa
             if (typeof examLobbyList !== 'undefined') {
                 examLobbyList.forEach(exam => {
                     lobbyGrid.innerHTML += `
@@ -269,7 +326,6 @@
             document.getElementById(`step-${stepNum}`).classList.add('active');
         }
 
-        // Tải file JS động
         function loadExamScript(fileUrl, callback) {
             if (document.querySelector(`script[src="${fileUrl}"]`)) {
                 callback();
@@ -277,7 +333,14 @@
             }
             const script = document.createElement('script');
             script.src = fileUrl;
+            
             script.onload = callback;
+            
+            script.onerror = function() {
+                alert("LỖI GITHUB: Không tìm thấy file '" + fileUrl + "'.\n\n1. Kiểm tra lại xem chữ Hoa/chữ thường ở tên thư mục và tên file có khớp 100% không.\n2. Vui lòng bấm Ctrl + F5 để xóa Cache.");
+                showStep(0);
+            };
+            
             document.body.appendChild(script);
         }
 
@@ -285,16 +348,19 @@
             examAnswers = {};
             currentQuestionIndex = 0;
             
-            // Lấy thông tin cơ bản từ Sảnh
             currentExamInfo = examLobbyList.find(e => e.id === examId);
             
             document.getElementById('exam-code').value = "Đang tải dữ liệu...";
             showStep(1);
 
-            // Tải file đề tương ứng lên
             loadExamScript(fileUrl, function() {
-                questionsDataset = window.examQuestionsData[examId];
-                document.getElementById('exam-code').value = currentExamInfo.code;
+                if (window.examQuestionsData && window.examQuestionsData[examId]) {
+                    questionsDataset = window.examQuestionsData[examId];
+                    document.getElementById('exam-code').value = currentExamInfo.code;
+                } else {
+                    alert("LỖI ID: Tải file thành công nhưng không thấy ID '" + examId + "' ở trong file.\n\nHãy mở file " + fileUrl + " và kiểm tra lại dòng:\nwindow.examQuestionsData['" + examId + "'] = [...]");
+                    showStep(0);
+                }
             });
         }
 
@@ -346,14 +412,12 @@
             document.getElementById('progress-bar-fill').style.width = `${percentage}%`;
         }
 
-        // Xử lý click chọn đáp án (Trắc nghiệm)
         function selectMCQOption(answerKey) {
             examAnswers[currentQuestionIndex] = answerKey;
             renderCurrentQuestion();
             updateMatrixStatusStyles();
         }
 
-        // Xử lý nhập đáp án (Điền khuyết)
         function saveFillAnswer(inputEl) {
             if(inputEl.value.trim() !== "") {
                 examAnswers[currentQuestionIndex] = inputEl.value.trim();
@@ -375,7 +439,6 @@
                 </div>
             `;
 
-            // RENDER TRẮC NGHIỆM
             if (qData.type === 'mcq' && qData.options) {
                 const letters = ['A', 'B', 'C', 'D'];
                 let optionsHtml = '';
@@ -392,7 +455,6 @@
                 });
                 htmlHTML += `<div class="mcq-row">${optionsHtml}</div>`;
             } 
-            // RENDER ĐIỀN KHUYẾT
             else if (qData.type === 'fill') {
                 const savedVal = examAnswers[currentQuestionIndex] || '';
                 htmlHTML += `
@@ -428,7 +490,6 @@
             }, 1000);
         }
 
-        // Nộp bài, chấm điểm
         function finishExam() {
             clearInterval(globalTimerInterval);
             
@@ -438,7 +499,6 @@
             questionsDataset.forEach((q, index) => {
                 const userAnswer = examAnswers[index] || "";
                 
-                // So sánh đáp án (không phân biệt hoa/thường)
                 if (userAnswer.toString().trim().toLowerCase() === q.correctAnswer.toString().trim().toLowerCase()) {
                     correctCount++;
                 } else {
