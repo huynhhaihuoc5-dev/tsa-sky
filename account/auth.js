@@ -1,3 +1,4 @@
+localStorage.clear();
 // =====================================
 // TẠO ADMIN MẶC ĐỊNH
 // =====================================
@@ -13,7 +14,7 @@ if (!adminExist) {
     users.push({
         fullname: "Administrator",
         username: "admin",
-        password: "admin123",
+        password: "Bh25052k8@",
         role: "admin",
         banned: false
     });
