@@ -1,4 +1,4 @@
-<script>
+
 
 document.addEventListener("DOMContentLoaded",()=>{
 
@@ -115,4 +115,4 @@ function logoutNavbar(){
 
 }
 
-</script>
+
