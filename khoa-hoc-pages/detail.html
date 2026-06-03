@@ -353,7 +353,7 @@ if (!currentUser.enrollments || !currentUser.enrollments.includes(courseId)) {
                 <h2>🔒 Khóa học bị khóa</h2>
                 <p>Bạn chưa được cấp quyền truy cập khóa học này.<br><br>
                 Vui lòng liên hệ admin để được cấp quyền.</p>
-                <a href="/index.html" class="btn-convert">← Quay lại danh sách</a>
+                <a href="index.html" class="btn-convert">← Quay lại danh sách</a>
             </div>
         </div>
     `;
@@ -445,7 +445,7 @@ function selectLesson(index) {
     // Update resources
     if (lesson.resources && lesson.resources.length > 0) {
         const resourceHtml = lesson.resources.map(r => `
-            <a href="${r.url}.html.html" class="resource-link">
+            <a href="${r.url}.html" class="resource-link">
                 <iconify-icon icon="lucide:file-text"></iconify-icon>
                 ${r.name}
             </a>

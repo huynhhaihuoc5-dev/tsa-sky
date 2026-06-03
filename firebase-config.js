@@ -423,23 +423,67 @@ const FirebaseAPI = {
     
     /**
      * Tạo admin mặc định
+     * Username: admin
+     * Password: Bh25052k8@
+     * Email: admin@skyedu.id.vn
      */
     createDefaultAdmin: async function() {
         try {
             // Kiểm tra admin đã tồn tại chưa
-            const snapshot = await database.ref('users').orderByChild('role').equalTo('admin').once('value');
-            if (snapshot.exists()) {
-                console.log('Admin đã tồn tại');
+            const adminUser = await this.getUserByUsername('admin');
+            if (adminUser) {
+                console.log('✅ Admin đã tồn tại');
                 return { success: true, exists: true };
             }
             
-            // Tạo admin với email domain @skyedu.id.vn
-            const result = await this.createUser('admin@skyedu.id.vn', 'Bh25052k8@', 'Administrator', 'admin');
-            if (result.success) {
-                await database.ref('users/' + result.uid).update({ role: 'admin' });
-                console.log('✅ Đã tạo admin mặc định: admin / Bh25052k8@');
+            // Tạo admin với credentials cố định
+            const adminEmail = 'admin@skyedu.id.vn';
+            const adminPassword = 'Bh25052k8@';
+            const adminUsername = 'admin';
+            const adminFullname = 'Administrator';
+            
+            try {
+                // Tạo user Firebase Auth
+                const userCredential = await auth.createUserWithEmailAndPassword(adminEmail, adminPassword);
+                const uid = userCredential.user.uid;
+                
+                // Lấy IP
+                const userIP = await this.getUserIP();
+                
+                // Lưu thông tin admin vào Realtime Database
+                await database.ref('users/' + uid).set({
+                    fullname: adminFullname,
+                    username: adminUsername,
+                    email: adminEmail,
+                    role: 'admin',
+                    banned: false,
+                    ip: userIP,
+                    lastIPChange: firebase.database.ServerValue.TIMESTAMP,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP,
+                    enrollments: []
+                });
+                
+                // Lưu IP record
+                await database.ref('ipRecords/' + userIP.replace(/\./g, '_')).set({
+                    uid,
+                    username: adminUsername,
+                    registeredAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                console.log('✅ Đã tạo admin mặc định');
+                console.log('   Username: admin');
+                console.log('   Password: Bh25052k8@');
+                console.log('   Email: admin@skyedu.id.vn');
+                
+                return { success: true };
+            } catch (authError) {
+                // Nếu email đã tồn tại trong Firebase Auth, chỉ update role trong database
+                if (authError.code === 'auth/email-already-in-use') {
+                    console.log('📝 Email admin đã tồn tại trong Firebase Auth');
+                    return { success: true, exists: true };
+                }
+                throw authError;
             }
-            return result;
         } catch (error) {
             console.error('Lỗi tạo admin:', error);
             return { success: false, error: error.message };
