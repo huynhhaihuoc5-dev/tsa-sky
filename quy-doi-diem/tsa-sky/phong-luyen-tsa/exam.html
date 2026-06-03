@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Làm bài thi TSA - SKY EDU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="../anti-cheat.js"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]'], ['$$', '$$']], processEscapes: true, processEnvironments: true },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        :root {
+            --primary-blue: #1677FF;
+            --dark-navy: #051A39;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --q-font-size: 16px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Be Vietnam Pro', sans-serif; }
+        
+        body { background: white; overflow: hidden; }
+        
+        /* HEADER */
+        .exam-header {
+            background: var(--dark-navy);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            height: 56px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .exam-title { 
+            font-size: 18px; 
+            font-weight: 800; 
+            color: white;
+            letter-spacing: 1px;
+        }
+        
+        .exam-code { 
+            font-weight: 600;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .font-size-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .font-size-label {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+        
+        .header-font-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .header-font-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .header-timer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .timer-label {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+        
+        .timer-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #10b981;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .btn-submit-header {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-submit-header:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+        
+        /* CONTAINER */
+        .exam-workspace {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            height: calc(100vh - 56px);
+        }
+        
+        /* QUESTION PANEL */
+        .question-panel {
+            background: #fff;
+            margin: 16px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* TOOLBAR WITH FONT SIZE */
+        .q-toolbar {
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 8px 24px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .font-btn {
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .font-btn:hover {
+            background: #f1f5f9;
+        }
+        
+        /* QUESTION CONTENT */
+        .question-scroll-content {
+            padding: 24px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .question-header-row {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .question-number-badge {
+            background: #e6f4ff;
+            color: var(--primary-blue);
+            font-weight: 700;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: 1px solid #bae0ff;
+            font-size: 15px;
+        }
+        
+        .question-main-text {
+            font-size: var(--q-font-size);
+            line-height: 1.7;
+            font-weight: 500;
+            color: #1e293b;
+        }
+        
+        /* OPTIONS 2x2 GRID */
+        .mcq-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .mcq-option {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--dark-navy);
+            text-align: left;
+            transition: all 0.2s;
+            cursor: pointer;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .mcq-option:hover {
+            background: #e6f4ff;
+            border-color: var(--primary-blue);
+        }
+        
+        .mcq-option.selected {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+            box-shadow: 0 4px 10px rgba(22, 119, 255, 0.3);
+        }
+
+        /* CUSTOM MODAL DIALOG */
+        .custom-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-modal-overlay.active {
+            display: flex;
+        }
+
+        .custom-modal-box {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .custom-modal-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            background: #fef3c7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .custom-modal-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0f172a;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .custom-modal-message {
+            font-size: 15px;
+            color: #64748b;
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .custom-modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .custom-modal-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .custom-modal-btn-cancel {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .custom-modal-btn-cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .custom-modal-btn-confirm {
+            background: #10b981;
+            color: white;
+        }
+
+        .custom-modal-btn-confirm:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        
+        /* BOTTOM NAVIGATION */
+        .bottom-nav-bar {
+            background: #fff;
+            border-top: 1px solid #e2e8f0;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .btn-nav-arrow {
+            background: var(--dark-navy);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+        
+        .btn-nav-arrow:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        
+        .btn-nav-arrow.btn-next {
+            background: var(--primary-blue);
+        }
+        
+        .btn-nav-arrow.btn-next:not(:disabled):hover {
+            background: #0C63E7;
+        }
+        
+        /* SIDEBAR */
+        .sidebar-panel {
+            background: #fff;
+            border-left: 1px solid #e2e8f0;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* TIMER */
+        .global-timer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .timer-countdown-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark-navy);
+        }
+        
+        /* SUBMIT BUTTON */
+        .btn-submit-exam {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        
+        .btn-submit-exam:hover {
+            background: #059669;
+        }
+        
+        /* MATRIX 5 COLUMNS - CIRCULAR (GIỐNG MẪU) */
+        .questions-matrix {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .matrix-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%; /* HÌNH TRÒN */
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748B;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid #E2E8F0;
+        }
+        
+        .matrix-cell:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: #CBD5E1;
+        }
+        
+        .matrix-cell.active {
+            background: #1e293b;
+            color: white;
+            border-color: #1e293b;
+            box-shadow: 0 4px 12px rgba(30, 41, 59, 0.4);
+        }
+        
+        .matrix-cell.filled {
+            background: #1677FF;
+            color: white;
+            border-color: #1677FF;
+            box-shadow: 0 2px 8px rgba(22, 119, 255, 0.3);
+        }
+        
+        /* PROGRESS */
+        .progress-block {
+            margin-top: auto;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 16px;
+        }
+        
+        .progress-bar-bg {
+            background: #e2e8f0;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        
+        .progress-bar-fill {
+            background: var(--primary-blue);
+            width: 0%;
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        /* QUESTION IMAGES */
+        #questionImages img {
+            max-width: 100%;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        /* SCROLLBAR */
+        .question-scroll-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .question-scroll-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .question-scroll-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="exam-header">
+        <div class="exam-title">TSA SKY</div>
+        <div class="exam-code" id="examCodeDisplay">Mã đề: huyluledeptrai</div>
+    </div>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="exam-workspace">
+        <!-- QUESTION PANEL -->
+        <div class="question-panel">
+            <!-- TOOLBAR -->
+            <div class="q-toolbar">
+                <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Cỡ chữ đề thi:</span>
+                <button class="font-btn" onclick="changeFontSize(-2)">A-</button>
+                <button class="font-btn" onclick="changeFontSize(2)">A+</button>
+            </div>
+            
+            <!-- QUESTION CONTENT -->
+            <div class="question-scroll-content" id="questionDisplayContainer">
+                <!-- Question will be rendered here -->
+            </div>
+            
+            <!-- BOTTOM NAVIGATION -->
+            <div class="bottom-nav-bar">
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-nav-arrow" id="btnPrev" onclick="prevQuestion()">
+                        <iconify-icon icon="lucide:chevron-left"></iconify-icon> Câu trước
+                    </button>
+                    <button class="btn-nav-arrow btn-next" id="btnNext" onclick="nextQuestion()">
+                        Câu tiếp <iconify-icon icon="lucide:chevron-right"></iconify-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar-panel">
+            <!-- TIMER & SUBMIT -->
+            <div class="global-timer-row">
+                <div>
+                    <div style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Thời gian còn lại</div>
+                    <div class="timer-countdown-text" id="timerDisplay">59:56</div>
+                </div>
+                <button class="btn-submit-exam" onclick="submitExam()">Nộp bài</button>
+            </div>
+
+            <!-- MATRIX STATUS -->
+            <div>
+                <div style="display: flex; gap: 12px; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px;">
+                    <span><span style="width:12px; height:12px; border-radius:50%; display:inline-block; background:var(--dark-navy); vertical-align:middle;"></span> Đang xem</span>
+                    <span><span style="width:12px; height:12px; border-radius:50%; display:inline-block; background:#e0f2fe; vertical-align:middle;"></span> Đã điền</span>
+                </div>
+                <div class="questions-matrix" id="matrixGrid"></div>
+            </div>
+
+            <!-- PROGRESS -->
+            <div class="progress-block">
+                <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:bold; margin-bottom: 6px;">
+                    <span>Tiến độ bài làm</span>
+                    <span id="progressText">0/0</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const examId = urlParams.get('examId');
+        let currentExam = null;
+        let currentQuestionIndex = 0;
+        let examAnswers = {};
+        let timeLeft = 0;
+        let timerInterval = null;
+        let currentFontSize = 16;
+
+        window.onload = async function() {
+            // Load exam
+            const exams = JSON.parse(localStorage.getItem('exams')) || [];
+            currentExam = exams.find(e => e.id === examId);
+            
+            if (!currentExam) {
+                alert('Không tìm thấy đề thi!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Start anti-cheat
+            const proceed = await antiCheat.startExamMode();
+            if (!proceed) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Display info
+            document.getElementById('examCodeDisplay').textContent = 'MÃ ĐỀ: ' + currentExam.code;
+            timeLeft = currentExam.timeMinutes * 60;
+            
+            initMatrix();
+            renderQuestion();
+            startTimer();
+        };
+
+        function changeFontSize(step) {
+            currentFontSize += step;
+            if(currentFontSize < 12) currentFontSize = 12;
+            if(currentFontSize > 30) currentFontSize = 30;
+            document.documentElement.style.setProperty('--q-font-size', currentFontSize + 'px');
+        }
+
+        function initMatrix() {
+            const grid = document.getElementById('matrixGrid');
+            grid.innerHTML = '';
+            
+            currentExam.questions.forEach((q, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'matrix-cell';
+                cell.textContent = i + 1;
+                cell.onclick = () => {
+                    currentQuestionIndex = i;
+                    renderQuestion();
+                };
+                grid.appendChild(cell);
+            });
+            
+            updateMatrix();
+        }
+
+        function updateMatrix() {
+            const cells = document.querySelectorAll('.matrix-cell');
+            let doneCount = 0;
+            
+            cells.forEach((cell, idx) => {
+                cell.classList.remove('active', 'filled');
+                if (idx === currentQuestionIndex) {
+                    cell.classList.add('active');
+                }
+                if (examAnswers[idx] !== undefined && examAnswers[idx] !== '') {
+                    cell.classList.add('filled');
+                    doneCount++;
+                }
+            });
+            
+            const total = currentExam.questions.length;
+            const percentage = Math.round((doneCount / total) * 100) || 0;
+            document.getElementById('progressText').textContent = `${doneCount}/${total}`;
+            document.getElementById('progressBarFill').style.width = `${percentage}%`;
+        }
+
+        function renderQuestion() {
+            const q = currentExam.questions[currentQuestionIndex];
+            const container = document.getElementById('questionDisplayContainer');
+            
+            let html = `
+                <div class="question-header-row">
+                    <div class="question-number-badge">${currentQuestionIndex + 1}</div>
+                    <div class="question-main-text">${q.content || ''}</div>
+                </div>
+            `;
+
+            // Render images
+            if (q.pastedImages && q.pastedImages.length > 0) {
+                q.pastedImages.forEach(img => {
+                    html += `<img src="${img.data}" style="max-width: 100%; margin: 16px 0; border-radius: 8px;">`;
+                });
+            }
+
+            // Render options
+            if (q.type === 'mcq' && q.options) {
+                const letters = ['A', 'B', 'C', 'D'];
+                html += '<div class="mcq-row">';
+                q.options.forEach((opt, idx) => {
+                    const letter = letters[idx];
+                    const isSelected = examAnswers[currentQuestionIndex] === letter;
+                    html += `
+                        <div class="mcq-option ${isSelected ? 'selected' : ''}" onclick="selectAnswer('${letter}')">
+                            <strong>${letter}.</strong> ${opt}
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+
+            document.getElementById('btnPrev').disabled = currentQuestionIndex === 0;
+            document.getElementById('btnNext').disabled = currentQuestionIndex === currentExam.questions.length - 1;
+
+            updateMatrix();
+
+            if (window.MathJax) {
+                MathJax.typesetPromise([container]);
+            }
+        }
+
+        function selectAnswer(answer) {
+            examAnswers[currentQuestionIndex] = answer;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < currentExam.questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            const timeString = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            document.getElementById('timerDisplay').textContent = timeString;
+        }
+
+        function submitExam() {
+            // Dùng custom dialog thay vì confirm() - giữ trong fullscreen
+            showCustomConfirm(
+                'Nộp bài thi?',
+                'Bạn sẽ không thể sửa đổi sau khi nộp. Hãy chắc chắn bạn đã kiểm tra lại tất cả các câu hỏi.',
+                function() {
+                    // Callback khi xác nhận nộp bài
+                    clearInterval(timerInterval);
+                    antiCheat.endExamMode();
+
+                    let score = 0;
+                    const wrongQuestions = [];
+
+                    currentExam.questions.forEach((q, idx) => {
+                        const userAnswer = examAnswers[idx];
+                        const correct = q.correctAnswer;
+                        
+                        if (userAnswer === correct) {
+                            score++;
+                        } else {
+                            wrongQuestions.push({
+                                index: idx + 1,
+                                question: q.content,
+                                userAnswer: userAnswer || '(Không trả lời)',
+                                correctAnswer: correct,
+                                explanation: q.explanation || ''
+                            });
+                        }
+                    });
+
+                    const result = {
+                        examName: currentExam.name,
+                        examCode: currentExam.code,
+                        score: score,
+                        total: currentExam.questions.length,
+                        percentage: Math.round((score / currentExam.questions.length) * 100),
+                        wrongQuestions: wrongQuestions,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    localStorage.setItem('lastExamResult', JSON.stringify(result));
+                    window.location.href = 'result.html';
+                }
+            );
+        }
+
+        // ========================================
+        // CUSTOM CONFIRM DIALOG (TRONG FULLSCREEN)
+        // ========================================
+        
+        function showCustomConfirm(title, message, onConfirm) {
+            const modal = document.getElementById('customModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const btnCancel = document.getElementById('modalBtnCancel');
+            const btnConfirm = document.getElementById('modalBtnConfirm');
+
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.classList.add('active');
+
+            // Remove old listeners
+            const newBtnCancel = btnCancel.cloneNode(true);
+            const newBtnConfirm = btnConfirm.cloneNode(true);
+            btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+            btnConfirm.parentNode.replaceChild(newBtnConfirm, btnConfirm);
+
+            // Add new listeners
+            newBtnCancel.addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+
+            newBtnConfirm.addEventListener('click', () => {
+                modal.classList.remove('active');
+                onConfirm();
+            });
+        }
+    </script>
+
+    <!-- Custom Modal Dialog -->
+    <div id="customModal" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-icon">⚠️</div>
+            <h2 id="modalTitle" class="custom-modal-title">Nộp bài thi?</h2>
+            <p id="modalMessage" class="custom-modal-message">
+                Bạn sẽ không thể sửa đổi sau khi nộp.
+            </p>
+            <div class="custom-modal-buttons">
+                <button id="modalBtnCancel" class="custom-modal-btn custom-modal-btn-cancel">
+                    ✕ Hủy
+                </button>
+                <button id="modalBtnConfirm" class="custom-modal-btn custom-modal-btn-confirm">
+                    ✓ Nộp bài
+                </button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

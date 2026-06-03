@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - SKY EDU</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
+<!-- MathJax cho LaTeX -->
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+window.MathJax = {
+    tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        processEscapes: true,
+        processEnvironments: true
+    },
+    options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+};
+</script>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #EBF4FF 0%, #FFF7ED 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.admin-container {
+    max-width: 1400px;
+    margin: auto;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+
+.admin-header {
+    background: linear-gradient(135deg, #051A39, #1677FF);
+    color: white;
+    padding: 40px 30px;
+    text-align: center;
+}
+
+.admin-header h1 {
+    font-size: 36px;
+    margin-bottom: 12px;
+    font-weight: 800;
+}
+
+.admin-header p {
+    opacity: 0.9;
+    font-size: 16px;
+}
+
+.tabs {
+    display: flex;
+    background: #F8FAFC;
+    border-bottom: 2px solid #E2E8F0;
+    overflow-x: auto;
+}
+
+.tab {
+    padding: 18px 30px;
+    cursor: pointer;
+    font-weight: 700;
+    color: #64748B;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.tab:hover {
+    background: #EFF6FF;
+    color: #1677FF;
+}
+
+.tab.active {
+    color: #1677FF;
+    border-bottom-color: #1677FF;
+    background: white;
+}
+
+.tab-content {
+    display: none;
+    padding: 30px;
+    animation: fadeIn 0.3s;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    padding: 25px;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+}
+
+.stat-card h2 {
+    font-size: 40px;
+    margin-bottom: 8px;
+}
+
+.stat-card p {
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+.blue { background: linear-gradient(135deg, #1677FF, #38BDF8); }
+.green { background: linear-gradient(135deg, #10B981, #34D399); }
+.red { background: linear-gradient(135deg, #EF4444, #F87171); }
+.orange { background: linear-gradient(135deg, #F59E0B, #FBBF24); }
+.purple { background: linear-gradient(135deg, #8B5CF6, #A78BFA); }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+thead {
+    background: #051A39;
+    color: white;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+}
+
+tbody tr {
+    border-bottom: 1px solid #E2E8F0;
+}
+
+tbody tr:hover {
+    background: #F8FAFC;
+}
+
+.btn {
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+    transition: all 0.2s;
+    margin: 2px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+
+.btn-primary { background: #1677FF; color: white; }
+.btn-success { background: #10B981; color: white; }
+.btn-warning { background: #F59E0B; color: white; }
+.btn-danger { background: #EF4444; color: white; }
+.btn-secondary { background: #64748B; color: white; }
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.badge-active { background: #DCFCE7; color: #166534; }
+.badge-banned { background: #FEE2E2; color: #991B1B; }
+.badge-admin { background: #DBEAFE; color: #1E40AF; }
+.badge-warning { background: #FEF3C7; color: #92400E; }
+
+.upload-zone {
+    border: 3px dashed #CBD5E1;
+    border-radius: 15px;
+    padding: 60px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #F8FAFC;
+}
+
+.upload-zone:hover {
+    border-color: #1677FF;
+    background: #EFF6FF;
+}
+
+.upload-zone.dragover {
+    border-color: #10B981;
+    background: #ECFDF5;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #0F172A;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #1677FF;
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+}
+
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 30px;
+    position: relative;
+    animation: modalSlideIn 0.3s;
+}
+
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #EF4444;
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.question-preview {
+    background: #F8FAFC;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 15px 0;
+    border-left: 4px solid #1677FF;
+}
+
+.id-mapping {
+    background: #FFF7ED;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border: 2px solid #FDBA74;
+}
+
+.id-mapping h4 {
+    color: #9A3412;
+    margin-bottom: 15px;
+}
+
+.id-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.id-item {
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.id-code {
+    color: #1677FF;
+    font-family: 'Courier New', monospace;
+    font-weight: 800;
+}
+
+.image-container {
+    position: relative;
+    display: inline-block;
+    margin: 15px 0;
+}
+
+.draggable-image {
+    max-width: 100%;
+    cursor: move;
+    border: 2px solid #CBD5E1;
+    border-radius: 8px;
+}
+
+.image-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    align-items: center;
+}
+
+.back-btn {
+    display: inline-block;
+    padding: 12px 20px;
+    background: #64748B;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.alert-info {
+    background: #DBEAFE;
+    color: #1E40AF;
+    border-left: 4px solid #1677FF;
+}
+
+.alert-warning {
+    background: #FEF3C7;
+    color: #92400E;
+    border-left: 4px solid #F59E0B;
+}
+
+.course-card {
+    background: white;
+    border: 2px solid #E2E8F0;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+}
+
+.course-card:hover {
+    border-color: #1677FF;
+    box-shadow: 0 8px 24px rgba(22, 119, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+    .tabs {
+        flex-wrap: wrap;
+    }
+    
+    .tab {
+        flex: 1 1 auto;
+        text-align: center;
+        padding: 15px 10px;
+        font-size: 13px;
+    }
+    
+    .tab-content {
+        padding: 20px 15px;
+    }
+    
+    .stats {
+        grid-template-columns: 1fr;
+    }
+    
+    table {
+        font-size: 13px;
+    }
+    
+    th, td {
+        padding: 10px 5px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>🎯 ADMIN PANEL SKY EDU</h1>
+        <p>Quản lý toàn diện hệ thống luyện thi đánh giá tư duy</p>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">📊 Thống kê</div>
+        <div class="tab" onclick="switchTab(1)">👥 Quản lý TK</div>
+        <div class="tab" onclick="switchTab(2)">📝 Tạo đề thi</div>
+        <div class="tab" onclick="switchTab(3)">📚 Danh sách đề</div>
+        <div class="tab" id="tabCourse" onclick="switchTab(4)">🎓 Khóa học</div>
+    </div>
+
+    <!-- TAB 0: THỐNG KÊ -->
+    <div class="tab-content active" id="tab-0">
+        <a href="../index.html" class="back-btn">← Về trang chủ</a>
+        
+        <h2 style="margin-bottom: 20px;">📊 Tổng quan hệ thống</h2>
+        
+        <div class="stats">
+            <div class="stat-card blue">
+                <h2 id="totalUsers">0</h2>
+                <p>Tổng tài khoản</p>
+            </div>
+            <div class="stat-card green">
+                <h2 id="activeUsers">0</h2>
+                <p>Đang hoạt động</p>
+            </div>
+            <div class="stat-card red">
+                <h2 id="bannedUsers">0</h2>
+                <p>Đã khóa</p>
+            </div>
+            <div class="stat-card orange">
+                <h2 id="totalExams">0</h2>
+                <p>Đề thi</p>
+            </div>
+            <div class="stat-card purple">
+                <h2 id="totalCourses">0</h2>
+                <p>Khóa học</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 1: QUẢN LÝ TÀI KHOẢN -->
+    <div class="tab-content" id="tab-1">
+        <h2 style="margin-bottom: 20px;">👥 Quản lý tài khoản</h2>
+        
+        <div class="alert alert-info">
+            💡 <strong>Lưu ý:</strong> Mỗi IP chỉ được đăng ký 1 tài khoản. Đổi IP phải chờ 7 ngày.
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px;" id="adminOnlyButtons">
+            <button class="btn btn-danger" onclick="deleteAllUsersData()" style="background: #EF4444;">
+                🗑️ Xóa hết dữ liệu TK
+            </button>
+            <button class="btn btn-warning" onclick="syncUsersFromFirebase()" style="background: #F59E0B;">
+                🔄 Sync từ Firebase
+            </button>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Họ tên</th>
+                    <th>Tài khoản</th>
+                    <th>IP</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="userTable"></tbody>
+        </table>
+    </div>
+
+    <!-- TAB 2: TẠO ĐỀ THI -->
+    <div class="tab-content" id="tab-2">
+        <h2 style="margin-bottom: 20px;">📝 Tạo đề thi mới</h2>
+        
+        <div class="id-mapping">
+            <h4>📌 Bảng mapping ID câu hỏi</h4>
+            <div class="id-list">
+                <div class="id-item"><span class="id-code">id1</span> = Trắc nghiệm</div>
+                <div class="id-item"><span class="id-code">id2</span> = Chọn nhiều đáp án</div>
+                <div class="id-item"><span class="id-code">id3</span> = Điền khuyết</div>
+                <div class="id-item"><span class="id-code">id4</span> = Điền nhiều ô</div>
+                <div class="id-item"><span class="id-code">id5</span> = Tự luận</div>
+                <div class="id-item"><span class="id-code">id6</span> = Kéo thả</div>
+                <div class="id-item"><span class="id-code">id7</span> = Ma trận</div>
+                <div class="id-item"><span class="id-code">id8</span> = Đúng/Sai</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Tên đề thi</label>
+            <input type="text" class="form-control" id="examName" placeholder="VD: Đề thi TSA ĐH Bách khoa HN - Đề 5">
+        </div>
+
+        <div class="form-group">
+            <label>Mã đề</label>
+            <input type="text" class="form-control" id="examCode" placeholder="VD: TSA-05">
+        </div>
+
+        <div class="form-group">
+            <label>Thời gian (phút)</label>
+            <input type="number" class="form-control" id="examTime" value="150">
+        </div>
+
+        <div class="form-group">
+            <label>Loại đề</label>
+            <select class="form-control" id="examType" onchange="updateCategoryOptions()">
+                <option value="tsa">TSA - Đánh giá tư duy</option>
+                <option value="hsa">HSA - Đánh giá năng lực</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Mục đề (Phân loại trong phòng luyện)</label>
+            <select class="form-control" id="examCategory">
+                <option value="basic">Các dạng cơ bản</option>
+                <option value="advanced">Luyện tư duy toán học</option>
+                <option value="full">Full đề TSA</option>
+            </select>
+            <small style="color: #64748B; display: block; margin-top: 8px;">
+                💡 Chọn mục hiển thị trong phòng luyện (Cơ bản, Nâng cao, hoặc Full đề)
+            </small>
+        </div>
+
+        <div class="upload-zone" id="uploadZone">
+            <h3 style="color: #1677FF; margin-bottom: 15px;">📤 Kéo thả file vào đây</h3>
+            <p style="color: #64748B; margin-bottom: 15px;">Hỗ trợ: PDF, TXT, DOCX</p>
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                Hoặc chọn file từ máy
+            </button>
+            <input type="file" id="fileInput" accept=".pdf,.txt,.docx" style="display: none;">
+        </div>
+
+        <div id="parsedQuestions" style="margin-top: 30px;"></div>
+
+        <button class="btn btn-success" onclick="addQuestionManually()" style="margin-top: 20px;">
+            ➕ Thêm câu hỏi thủ công
+        </button>
+
+        <button class="btn btn-primary" onclick="saveExam()" style="margin-top: 20px; float: right;">
+            💾 Lưu đề thi
+        </button>
+    </div>
+
+    <!-- TAB 3: DANH SÁCH ĐỀ -->
+    <div class="tab-content" id="tab-3">
+        <h2 style="margin-bottom: 20px;">📚 Danh sách đề thi đã tạo</h2>
+        <div id="examList"></div>
+    </div>
+
+    <!-- TAB 4: KHÓA HỌC -->
+    <div class="tab-content" id="tab-4">
+        <h2 style="margin-bottom: 20px;">🎓 Quản lý khóa học</h2>
+        
+        <div class="alert alert-warning">
+            ⚠️ <strong>Chỉ Admin mới có quyền quản lý khóa học!</strong> Moderator không thể truy cập phần này.
+        </div>
+        
+        <button class="btn btn-primary" onclick="openCourseModal()" style="margin-bottom: 20px;">
+            ➕ Tạo khóa học mới
+        </button>
+        
+        <div id="courseList" style="margin-top: 20px;"></div>
+    </div>
+</div>
+
+<!-- Modal thêm/sửa câu hỏi -->
+<div class="modal" id="questionModal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">×</button>
+        <h2 style="margin-bottom: 20px;">Chỉnh sửa câu hỏi</h2>
+        <div id="questionForm"></div>
+    </div>
+</div>
+
+<!-- Modal tạo khóa học -->
+<div class="modal" id="courseModal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeCourseModal()">×</button>
+        <h2 style="margin-bottom: 20px;">Tạo khóa học mới</h2>
+        <div class="alert alert-info">
+            💡 Tính năng khóa học đang được phát triển. Hiện tại chỉ dùng để quản lý nội bộ.
+        </div>
+        <div id="courseForm">
+            <div class="form-group">
+                <label>Tên khóa học</label>
+                <input type="text" class="form-control" id="courseName">
+            </div>
+            <div class="form-group">
+                <label>Mô tả</label>
+                <textarea class="form-control" id="courseDesc"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Role yêu cầu (để trống = tất cả)</label>
+                <input type="text" class="form-control" id="courseRole" placeholder="VD: premium, vip">
+            </div>
+            <button class="btn btn-primary" onclick="saveCourse()">💾 Lưu khóa học</button>
+        </div>
+    </div>
+</div>
+
+    <script src="admin-script.js"></script>
+    
+    <!-- MathJax cho preview LaTeX trong admin -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    
+    <script>
+        // Hiển thị role trong header
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleText = document.querySelector('.admin-header p');
+            if (currentUser.role === 'moderator') {
+                roleText.textContent = '👮 Quản trị viên - Quản lý đề thi và tài khoản';
+            } else if (currentUser.role === 'admin') {
+                roleText.textContent = '👑 Administrator - Toàn quyền quản lý hệ thống';
+            }
+
+            // Ẩn nút xóa hết nếu không phải admin
+            if (currentUser.role !== 'admin') {
+                const adminOnlyButtons = document.getElementById('adminOnlyButtons');
+                if (adminOnlyButtons) {
+                    adminOnlyButtons.style.display = 'none';
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

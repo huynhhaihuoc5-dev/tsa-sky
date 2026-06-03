@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phòng luyện HSA - SKY EDU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        .training-hero {
+            background: linear-gradient(135deg, #EBF4FF 0%, #FFF7ED 100%);
+            padding: 80px 0 60px;
+            text-align: center;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        
+        .training-hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--dark-navy);
+            margin-bottom: 16px;
+        }
+        
+        .training-hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        
+        .training-sections {
+            padding: 60px 0;
+        }
+        
+        .section-divider {
+            margin: 80px 0 60px;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        
+        .section-title iconify-icon {
+            font-size: 40px;
+            color: var(--primary-blue);
+        }
+        
+        .section-title h2 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--dark-navy);
+        }
+        
+        .exam-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        
+        .exam-card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            border: 2px solid #E2E8F0;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(5, 26, 57, 0.02);
+        }
+        
+        .exam-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 40px rgba(22, 119, 255, 0.15);
+            border-color: var(--primary-blue);
+        }
+        
+        .exam-card h3 {
+            font-size: 20px;
+            color: var(--dark-navy);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        
+        .exam-meta {
+            color: var(--text-muted);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .exam-meta iconify-icon {
+            color: var(--primary-blue);
+            font-size: 18px;
+        }
+        
+        .badge-level {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 12px;
+        }
+        
+        .badge-easy { background: #DCFCE7; color: #166534; }
+        .badge-medium { background: #FEF3C7; color: #92400E; }
+        .badge-hard { background: #FEE2E2; color: #991B1B; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container header-content">
+            <a href="../index.html" class="logo-container">
+                <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 26C12 26 18 22 22 16C24 13 26 9 28 4C23 6 19 8 16 10C10 14 6 20 6 26Z" fill="#38BDF8"/>
+                    <path d="M10 26C14 26 18 23 21 19C22.5 17 24 14 25 11C21 12 18 13.5 16 15C12 18 10 22 10 26Z" fill="#1677FF"/>
+                </svg>
+                <div class="logo-text">
+                    <div class="logo-title">SKY EDU</div>
+                    <div class="logo-subtitle">Fly higher - Think better</div>
+                </div>
+            </a>
+            <nav>
+                <ul class="nav-list">
+                    <li><a href="../index.html">Trang chủ</a></li>
+                    <li><a href="../quy-doi-diem.html">Quy đổi điểm</a></li>
+                    <li><a href="../phong-luyen-tsa/index.html">Phòng luyện TSA</a></li>
+                    <li><a href="../phong-luyen-hsa/index.html">Phòng luyện HSA</a></li>
+                    <li id="guestMenu"><a href="../account/dang-nhap.html">Đăng nhập</a></li>
+                    <li id="guestRegister"><a href="../account/dang-ky.html" class="btn-signup">Đăng ký</a></li>
+                    <li id="userMenu" style="display:none;position:relative;">
+                        <a href="#" id="userBtn" class="user-btn">
+                            <div id="navAvatar" class="nav-avatar">A</div>
+                            <div class="user-info">
+                                <span class="user-label">Xin chào</span>
+                                <span id="navUsername" class="user-name">Tài khoản</span>
+                            </div>
+                            <span class="user-arrow">▼</span>
+                        </a>
+                        <div id="dropdownMenu" class="dropdown-menu">
+                            <div class="dropdown-header">
+                                <div id="dropdownAvatar" class="dropdown-avatar">A</div>
+                                <div>
+                                    <strong id="dropdownName" style="color:#0F172A;">Tài khoản</strong>
+                                    <p style="color:#64748B;margin-top:4px;font-size:13px;">Thành viên SKY EDU</p>
+                                </div>
+                            </div>
+                            <a href="../account/tai-khoan.html">👤 Hồ sơ cá nhân</a>
+                            <a id="adminLink" href="../account/admin.html" style="display:none;">⚙️ Admin Panel</a>
+                            <a href="../account/doi-mat-khau.html">🔒 Đổi mật khẩu</a>
+                            <a href="#" onclick="logoutNavbar()">🚪 Đăng xuất</a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+
+    <section class="training-hero">
+        <div class="container">
+            <div class="badge">PHÒNG LUYỆN HSA</div>
+            <h1>Đánh giá năng lực ĐHQG Hà Nội</h1>
+            <p>Hệ thống luyện tập toàn diện từ cơ bản đến nâng cao</p>
+        </div>
+    </section>
+
+    <main class="container training-sections">
+        <!-- PHẦN 1: CÁC DẠNG CƠ BẢN -->
+        <section>
+            <div class="section-title">
+                <iconify-icon icon="lucide:book-open"></iconify-icon>
+                <div>
+                    <h2>Các dạng cơ bản</h2>
+                    <p style="color: var(--text-muted); font-size: 16px; margin-top: 4px;">Làm quen với các dạng câu hỏi HSA</p>
+                </div>
+            </div>
+            
+            <div class="exam-grid" id="basicExamGrid">
+                <div style="grid-column: 1/-1; text-align:center; padding:60px 40px; background:white; border-radius:16px; border: 2px dashed #E2E8F0;">
+                    <iconify-icon icon="lucide:construction" style="font-size: 64px; color: #F59E0B; margin-bottom: 16px;"></iconify-icon>
+                    <h3 style="color: var(--dark-navy); font-size: 22px; margin-bottom: 12px;">Đang phát triển</h3>
+                    <p style="color: var(--text-muted); font-size: 16px;">Phần luyện tập các dạng cơ bản sẽ được cập nhật sớm</p>
+                </div>
+            </div>
+        </section>
+
+
+        <div class="section-divider"></div>
+
+        <!-- PHẦN 2: ĐỊNH LƯỢNG -->
+        <section>
+            <div class="section-title">
+                <iconify-icon icon="lucide:calculator"></iconify-icon>
+                <div>
+                    <h2>Định lượng</h2>
+                    <p style="color: var(--text-muted); font-size: 16px; margin-top: 4px;">Rèn luyện kỹ năng phân tích định lượng</p>
+                </div>
+            </div>
+            
+            <div class="exam-grid" id="advancedExamGrid">
+                <div style="grid-column: 1/-1; text-align:center; padding:60px 40px; background:white; border-radius:16px; border: 2px dashed #E2E8F0;">
+                    <iconify-icon icon="lucide:construction" style="font-size: 64px; color: #F59E0B; margin-bottom: 16px;"></iconify-icon>
+                    <h3 style="color: var(--dark-navy); font-size: 22px; margin-bottom: 12px;">Đang phát triển</h3>
+                    <p style="color: var(--text-muted); font-size: 16px;">Phần luyện tập định lượng sẽ được cập nhật sớm</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- PHẦN 3: FULL ĐỀ HSA -->
+        <section>
+            <div class="section-title">
+                <iconify-icon icon="lucide:file-check"></iconify-icon>
+                <div>
+                    <h2>Full đề HSA</h2>
+                    <p style="color: var(--text-muted); font-size: 16px; margin-top: 4px;">Đề thi hoàn chỉnh mô phỏng kỳ thi thực tế</p>
+                </div>
+            </div>
+            
+            <div class="exam-grid" id="fullExamGrid">
+                <!-- Danh sách đề thi sẽ được load từ JavaScript -->
+            </div>
+        </section>
+    </main>
+
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 26C12 26 18 22 22 16C24 13 26 9 28 4C23 6 19 8 16 10C10 14 6 20 6 26Z" fill="#38BDF8"/>
+                            <path d="M10 26C14 26 18 23 21 19C22.5 17 24 14 25 11C21 12 18 13.5 16 15C12 18 10 22 10 26Z" fill="#1677FF"/>
+                        </svg>
+                        <div>
+                            <div class="footer-logo-title">SKY EDU</div>
+                            <div class="footer-logo-subtitle">Fly higher - Think better</div>
+                        </div>
+                    </div>
+                    <p class="footer-desc">Đồng hành cùng thế hệ trẻ Việt Nam chinh phục kỳ thi đánh giá tư duy.</p>
+                </div>
+
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Luyện thi</h4>
+                        <a href="../phong-luyen-tsa/index.html">Luyện thi TSA</a>
+                        <a href="../phong-luyen-hsa/index.html">Luyện thi HSA</a>
+                        <a href="../quy-doi-diem.html">Quy đổi điểm</a>
+                    </div>
+
+                    <div class="footer-column">
+                        <h4>Hỗ trợ</h4>
+                        <a href="#guide">Hướng dẫn sử dụng</a>
+                        <a href="#faq">Câu hỏi thường gặp</a>
+                        <a href="#contact">Liên hệ hỗ trợ</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 SKY EDU. Độc lập tư duy - Nâng tầm tri thức.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+    <script src="../data/de3.js"></script>
+    <script>
+        // AUTO-IMPORT ĐỀ 323 NẾU CHƯA CÓ (HSA VERSION)
+        function autoImportExam323HSA() {
+            const exams = JSON.parse(localStorage.getItem('exams')) || [];
+            
+            // Kiểm tra xem đã có đề HSA SkyEdu chưa
+            const existingExam = exams.find(e => e.code === 'SkyEdu-HSA' && e.type === 'hsa');
+            if (existingExam) {
+                console.log('✅ Đề HSA SkyEdu đã tồn tại');
+                return;
+            }
+            
+            // Lấy dữ liệu đề 323
+            const de323Data = window.examQuestionsData && window.examQuestionsData['de3'];
+            if (!de323Data) {
+                console.warn('⚠️ Không tìm thấy dữ liệu đề 323');
+                return;
+            }
+            
+            // Tạo đề thi HSA mới
+            const newExam = {
+                id: 'exam-hsa-skyedu-' + Date.now(),
+                name: 'Đề thi thử HSA lần 1',
+                code: 'SkyEdu-HSA',
+                type: 'hsa',
+                category: 'full',
+                timeMinutes: 90,
+                totalQuestions: 40,
+                questions: [],
+                createdAt: new Date().toISOString()
+            };
+            
+            // Convert câu hỏi
+            de323Data.forEach(q => {
+                const newQuestion = {
+                    id: 'q' + q.id,
+                    type: 'mcq',
+                    content: q.text || '',
+                    options: [],
+                    correctAnswer: '',
+                    explanation: '',
+                    pastedImages: []
+                };
+                
+                // Xử lý theo type
+                if (q.type === 'mcq' && q.options) {
+                    newQuestion.options = q.options;
+                    newQuestion.correctAnswer = q.correctAnswer;
+                } else if (q.type === 'fill') {
+                    newQuestion.options = [
+                        'A. ' + (q.correctAnswer[0] || ''),
+                        'B. Đáp án khác',
+                        'C. Đáp án khác',
+                        'D. Đáp án khác'
+                    ];
+                    newQuestion.correctAnswer = 'A';
+                } else {
+                    // Các loại khác chuyển thành MCQ mẫu
+                    newQuestion.options = [
+                        'A. Đáp án A',
+                        'B. Đáp án B',
+                        'C. Đáp án C',
+                        'D. Đáp án D'
+                    ];
+                    newQuestion.correctAnswer = 'A';
+                }
+                
+                newExam.questions.push(newQuestion);
+            });
+            
+            // Lưu vào localStorage
+            exams.push(newExam);
+            localStorage.setItem('exams', JSON.stringify(exams));
+            
+            console.log('✅ Đã tự động import đề HSA SkyEdu - 40 câu');
+        }
+        
+        // KIỂM TRA ĐĂNG NHẬP
+        window.onload = function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                alert('⚠️ Vui lòng đăng nhập để truy cập phòng luyện!');
+                window.location.href = '../account/dang-nhap.html';
+                return;
+            }
+            
+            // Auto import đề 323 HSA
+            autoImportExam323HSA();
+            
+            loadExams();
+        };
+        
+        // Load danh sách đề HSA từ localStorage theo từng mục
+        function loadExams() {
+            const basicExamGrid = document.getElementById('basicExamGrid');
+            const advancedExamGrid = document.getElementById('advancedExamGrid');
+            const fullExamGrid = document.getElementById('fullExamGrid');
+            
+            // Lấy đề từ localStorage (do admin tạo)
+            const exams = JSON.parse(localStorage.getItem('exams')) || [];
+            const hsaExams = exams.filter(exam => exam.type === 'hsa');
+            
+            // Phân loại theo category
+            const basicExams = hsaExams.filter(e => e.category === 'basic');
+            const advancedExams = hsaExams.filter(e => e.category === 'advanced');
+            const fullExams = hsaExams.filter(e => e.category === 'full' || !e.category); // default là full
+            
+            // Hàm render empty state
+            const renderEmpty = (container, message) => {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align:center; padding:60px 40px; background:white; border-radius:16px; border: 2px dashed #E2E8F0;">
+                        <iconify-icon icon="lucide:construction" style="font-size: 64px; color: #F59E0B; margin-bottom: 16px;"></iconify-icon>
+                        <h3 style="color: var(--dark-navy); font-size: 22px; margin-bottom: 12px;">Đang phát triển</h3>
+                        <p style="color: var(--text-muted); font-size: 16px;">${message}</p>
+                    </div>
+                `;
+            };
+            
+            // Hàm render đề thi
+            const renderExams = (container, examList, emptyMessage) => {
+                if (examList.length === 0) {
+                    renderEmpty(container, emptyMessage);
+                    return;
+                }
+                
+                container.innerHTML = '';
+                examList.forEach(exam => {
+                    const card = document.createElement('div');
+                    card.className = 'exam-card';
+                    card.onclick = () => window.location.href = `exam.html?examId=${exam.id}`;
+                    
+                    card.innerHTML = `
+                        <h3>${exam.name}</h3>
+                        <div class="exam-meta">
+                            <iconify-icon icon="lucide:hash"></iconify-icon>
+                            <span>Mã đề: ${exam.code}</span>
+                        </div>
+                        <div class="exam-meta">
+                            <iconify-icon icon="lucide:file-text"></iconify-icon>
+                            <span>${exam.totalQuestions || exam.questions.length} câu hỏi</span>
+                        </div>
+                        <div class="exam-meta">
+                            <iconify-icon icon="lucide:clock"></iconify-icon>
+                            <span>${exam.timeMinutes} phút</span>
+                        </div>
+                        <span class="badge-level badge-hard">Thực chiến</span>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+            };
+            
+            // Render từng mục
+            renderExams(basicExamGrid, basicExams, 'Phần luyện tập các dạng cơ bản sẽ được cập nhật sớm');
+            renderExams(advancedExamGrid, advancedExams, 'Phần luyện tập định lượng sẽ được cập nhật sớm');
+            renderExams(fullExamGrid, fullExams, 'Chưa có đề thi HSA. Admin vui lòng tạo đề trong Admin Panel');
+        }
+    </script>
+</body>
+</html>

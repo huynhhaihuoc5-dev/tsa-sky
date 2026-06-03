@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Đổi mật khẩu</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="account.css">
+
+</head>
+<body>
+
+<div class="card">
+
+<h1>Đổi mật khẩu</h1>
+
+<input
+type="password"
+id="oldPassword"
+placeholder="Mật khẩu hiện tại">
+
+<input
+type="password"
+id="newPassword"
+placeholder="Mật khẩu mới">
+
+<input
+type="password"
+id="confirmPassword"
+placeholder="Nhập lại mật khẩu mới">
+
+<button onclick="changePassword()">
+Cập nhật mật khẩu
+</button>
+
+<div class="link">
+<a href="tai-khoan.html">
+← Quay lại tài khoản
+</a>
+</div>
+
+</div>
+
+<script>
+
+const currentUser =
+JSON.parse(
+localStorage.getItem("currentUser")
+);
+
+if(!currentUser){
+
+window.location.href =
+"dang-nhap.html";
+
+}
+
+function changePassword(){
+
+const oldPass =
+document.getElementById(
+"oldPassword"
+).value;
+
+const newPass =
+document.getElementById(
+"newPassword"
+).value;
+
+const confirmPass =
+document.getElementById(
+"confirmPassword"
+).value;
+
+if(!oldPass || !newPass || !confirmPass){
+
+alert("Vui lòng nhập đầy đủ");
+
+return;
+
+}
+
+if(oldPass !== currentUser.password){
+
+alert("Mật khẩu cũ không đúng");
+
+return;
+
+}
+
+if(newPass !== confirmPass){
+
+alert("Mật khẩu xác nhận không khớp");
+
+return;
+
+}
+
+const users =
+JSON.parse(
+localStorage.getItem("users")
+);
+
+const index =
+users.findIndex(
+u => u.username === currentUser.username
+);
+
+users[index].password =
+newPass;
+
+localStorage.setItem(
+"users",
+JSON.stringify(users)
+);
+
+currentUser.password =
+newPass;
+
+localStorage.setItem(
+"currentUser",
+JSON.stringify(currentUser)
+);
+
+alert("Đổi mật khẩu thành công");
+
+window.location.href =
+"tai-khoan.html";
+
+}
+
+</script>
+
+</body>
+</html>
