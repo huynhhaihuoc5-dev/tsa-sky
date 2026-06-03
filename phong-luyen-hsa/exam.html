@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Làm bài thi HSA - SKY EDU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="../anti-cheat.js"></script>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]'], ['$$', '$$']], processEscapes: true, processEnvironments: true },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Be Vietnam Pro', sans-serif; }
+        
+        body { background: white; overflow: hidden; }
+        
+        /* HEADER */
+        .exam-header {
+            background: #000;
+            color: white;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .exam-title { 
+            font-size: 24px; 
+            font-weight: 800; 
+            color: #10B981;
+        }
+        
+        .exam-code { 
+            font-size: 15px; 
+            color: #94A3B8; 
+            font-weight: 600;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #1a1a1a;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .user-menu:hover {
+            background: #2a2a2a;
+        }
+        
+        .user-menu span {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        /* CONTAINER */
+        .exam-container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+            background: white;
+        }
+        
+        .question-card {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        .q-number {
+            font-size: 18px;
+            color: #1e293b;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .q-text {
+            font-size: 17px;
+            line-height: 1.8;
+            color: #1e293b;
+            margin-bottom: 32px;
+        }
+        
+        /* OPTIONS 2x2 GRID */
+        .q-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        
+        .option {
+            background: #F8FAFC;
+            border: 2px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 18px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+            color: #1e293b;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option:hover {
+            border-color: #10B981;
+            background: #D1FAE5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        }
+        
+        .option.selected {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+            font-weight: 600;
+        }
+        
+        /* FOOTER NAVIGATION */
+        .exam-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 340px;
+            background: white;
+            border-top: 2px solid #E2E8F0;
+            padding: 20px 60px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+        }
+        
+        .btn {
+            padding: 14px 32px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-prev {
+            background: #F1F5F9;
+            color: #475569;
+        }
+        
+        .btn-prev:hover:not(:disabled) {
+            background: #E2E8F0;
+        }
+        
+        .btn-prev:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .btn-next {
+            background: #10B981;
+            color: white;
+        }
+        
+        .btn-next:hover:not(:disabled) {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-next:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        /* SIDEBAR */
+        .sidebar {
+            width: 340px;
+            background: #F8FAFC;
+            border-left: 2px solid #E2E8F0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        /* TIMER */
+        .timer-display {
+            text-align: center;
+            padding: 32px 24px;
+            background: white;
+            margin: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .timer-label {
+            font-size: 13px;
+            color: #64748B;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        
+        .timer-value {
+            font-size: 56px;
+            font-weight: 800;
+            color: #1e293b;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -1px;
+        }
+        
+        /* SUBMIT BUTTON */
+        .submit-btn {
+            background: #DC2626;
+            color: white;
+            margin: 0 20px 24px;
+            padding: 16px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .submit-btn:hover {
+            background: #B91C1C;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+        
+        /* PROGRESS SECTION */
+        .progress-section {
+            padding: 24px 20px;
+        }
+        
+        .sidebar-title {
+            font-size: 13px;
+            color: #64748B;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .progress-badges {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        
+        .badge {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 24px;
+        }
+        
+        .badge-done {
+            background: #D1FAE5;
+            color: #10B981;
+        }
+        
+        .badge-todo {
+            background: #FEF3C7;
+            color: #F59E0B;
+        }
+        
+        /* MATRIX 5 COLUMNS - CIRCULAR (GIỐNG MẪU) */
+        .questions-matrix {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .matrix-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%; /* HÌNH TRÒN */
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748B;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid #E2E8F0;
+        }
+        
+        .matrix-cell:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: #CBD5E1;
+        }
+        
+        .matrix-cell.active {
+            background: #1e293b;
+            color: white;
+            border-color: #1e293b;
+            box-shadow: 0 4px 12px rgba(30, 41, 59, 0.4);
+        }
+        
+        .matrix-cell.filled {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* QUESTION IMAGES */
+        #questionImages img {
+            max-width: 100%;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        /* SCROLLBAR */
+        .main-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .main-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .main-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* PADDING BOTTOM FOR FOOTER */
+        .question-card {
+            padding-bottom: 100px;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="exam-header">
+        <div class="header-left">
+            <div class="exam-title">HSA SKY</div>
+            <div class="exam-code" id="examCodeDisplay">Mã đề: HSA-234</div>
+        </div>
+        <div class="user-menu">
+            <span id="userDisplay">Đang nhận tên...</span>
+            <span>▼</span>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="exam-container">
+        <!-- CONTENT AREA -->
+        <div class="main-content">
+            <div class="question-card">
+                <div class="q-number">
+                    Câu <span id="qNumberDisplay">1</span>:
+                </div>
+                <div class="q-text" id="questionText">
+                    Đang tải câu hỏi...
+                </div>
+                <div id="questionImages"></div>
+                <div class="q-options" id="questionOptions"></div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="timer-display">
+                <div class="timer-label">Thời gian còn lại</div>
+                <div class="timer-value" id="timerDisplay">59:56</div>
+            </div>
+
+            <button class="submit-btn" onclick="submitExam()">Nộp bài</button>
+
+            <div class="progress-section">
+                <div class="sidebar-title">Đã làm / Chưa làm</div>
+                <div class="progress-badges">
+                    <div class="badge badge-done" id="doneCount">0</div>
+                    <div class="badge badge-todo" id="todoCount">0</div>
+                </div>
+                <div class="sidebar-title">Tiến độ câu hỏi (<span id="progressText">0/40</span>)</div>
+                <div class="matrix-grid" id="matrixGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER NAVIGATION -->
+    <div class="exam-footer">
+        <button class="btn btn-prev" id="btnPrev" onclick="prevQuestion()">← Câu trước</button>
+        <button class="btn btn-next" id="btnNext" onclick="nextQuestion()">Câu tiếp →</button>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const examId = urlParams.get('examId');
+        let currentExam = null;
+        let currentQuestionIndex = 0;
+        let examAnswers = {};
+        let timeLeft = 0;
+        let timerInterval = null;
+
+        window.onload = async function() {
+            // Load exam
+            const exams = JSON.parse(localStorage.getItem('exams')) || [];
+            currentExam = exams.find(e => e.id === examId);
+            
+            if (!currentExam) {
+                alert('Không tìm thấy đề thi!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Start anti-cheat
+            const proceed = await antiCheat.startExamMode();
+            if (!proceed) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Display info
+            const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {};
+            document.getElementById('userDisplay').textContent = currentUser.fullname || 'Thí sinh';
+            document.getElementById('examCodeDisplay').textContent = 'Mã đề: ' + currentExam.code;
+
+            timeLeft = currentExam.timeMinutes * 60;
+            
+            initMatrix();
+            renderQuestion();
+            startTimer();
+        };
+
+        function initMatrix() {
+            const grid = document.getElementById('matrixGrid');
+            grid.innerHTML = '';
+            
+            currentExam.questions.forEach((q, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'matrix-cell';
+                cell.textContent = i + 1;
+                cell.onclick = () => {
+                    currentQuestionIndex = i;
+                    renderQuestion();
+                };
+                grid.appendChild(cell);
+            });
+            
+            updateMatrix();
+        }
+
+        function updateMatrix() {
+            const cells = document.querySelectorAll('.matrix-cell');
+            let doneCount = 0;
+            
+            cells.forEach((cell, idx) => {
+                cell.classList.remove('active', 'filled');
+                if (idx === currentQuestionIndex) {
+                    cell.classList.add('active');
+                }
+                if (examAnswers[idx] !== undefined && examAnswers[idx] !== '') {
+                    cell.classList.add('filled');
+                    doneCount++;
+                }
+            });
+            
+            const total = currentExam.questions.length;
+            document.getElementById('doneCount').textContent = doneCount;
+            document.getElementById('todoCount').textContent = total - doneCount;
+            document.getElementById('progressText').textContent = `${doneCount}/${total}`;
+        }
+
+        function renderQuestion() {
+            const q = currentExam.questions[currentQuestionIndex];
+            
+            document.getElementById('qNumberDisplay').textContent = currentQuestionIndex + 1;
+            document.getElementById('questionText').innerHTML = q.content || '';
+
+            // Render images
+            const imgContainer = document.getElementById('questionImages');
+            imgContainer.innerHTML = '';
+            if (q.pastedImages && q.pastedImages.length > 0) {
+                q.pastedImages.forEach(img => {
+                    imgContainer.innerHTML += `<img src="${img.data}" style="max-width: 100%; margin: 16px 0; border-radius: 8px;">`;
+                });
+            }
+
+            // Render options
+            const optContainer = document.getElementById('questionOptions');
+            optContainer.innerHTML = '';
+            
+            if (q.type === 'mcq' && q.options) {
+                const letters = ['A', 'B', 'C', 'D'];
+                q.options.forEach((opt, idx) => {
+                    const letter = letters[idx];
+                    const isSelected = examAnswers[currentQuestionIndex] === letter;
+                    const div = document.createElement('div');
+                    div.className = 'option' + (isSelected ? ' selected' : '');
+                    div.innerHTML = `<strong>${letter}.</strong> ${opt}`;
+                    div.onclick = () => selectAnswer(letter);
+                    optContainer.appendChild(div);
+                });
+            }
+
+            document.getElementById('btnPrev').disabled = currentQuestionIndex === 0;
+            document.getElementById('btnNext').disabled = currentQuestionIndex === currentExam.questions.length - 1;
+
+            updateMatrix();
+
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.querySelector('.question-card')]);
+            }
+        }
+
+        function selectAnswer(answer) {
+            examAnswers[currentQuestionIndex] = answer;
+            renderQuestion();
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < currentExam.questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function submitExam() {
+            if (!confirm('Nộp bài thi?\n\nBạn sẽ không thể sửa đổi sau khi nộp.')) return;
+
+            clearInterval(timerInterval);
+            antiCheat.endExamMode();
+
+            let score = 0;
+            const wrongQuestions = [];
+
+            currentExam.questions.forEach((q, idx) => {
+                const userAnswer = examAnswers[idx];
+                const correct = q.correctAnswer;
+                
+                if (userAnswer === correct) {
+                    score++;
+                } else {
+                    wrongQuestions.push({
+                        index: idx + 1,
+                        question: q.content,
+                        userAnswer: userAnswer || '(Không trả lời)',
+                        correctAnswer: correct,
+                        explanation: q.explanation || ''
+                    });
+                }
+            });
+
+            const result = {
+                examName: currentExam.name,
+                examCode: currentExam.code,
+                score: score,
+                total: currentExam.questions.length,
+                percentage: Math.round((score / currentExam.questions.length) * 100),
+                wrongQuestions: wrongQuestions,
+                timestamp: new Date().toISOString()
+            };
+
+            localStorage.setItem('lastExamResult', JSON.stringify(result));
+            window.location.href = 'result.html';
+        }
+        
+        // === IMAGE MODAL FUNCTIONS ===
+        let imageModal = null;
+        let zoomLevel = 1;
+        let isDragging = false;
+        let startX, startY, translateX = 0, translateY = 0;
+        let currentImageElement = null;
+        
+        function openImageModal(imageSrc) {
+            // Create modal if not exists
+            if (!imageModal) {
+                imageModal = document.createElement('div');
+                imageModal.className = 'image-modal';
+                imageModal.innerHTML = `
+                    <div class="image-modal-content">
+                        <div class="image-modal-header">
+                            <div class="image-modal-title">
+                                <span>🖼️</span>
+                                <span>Xem ảnh chi tiết</span>
+                            </div>
+                            <div class="image-controls">
+                                <button class="img-control-btn" onclick="zoomImage(-0.2)">
+                                    <span>🔍</span> Zoom Out
+                                </button>
+                                <button class="img-control-btn" onclick="zoomImage(0.2)">
+                                    <span>🔍</span> Zoom In
+                                </button>
+                                <button class="img-control-btn" onclick="resetImageView()">
+                                    <span>↺</span> Reset
+                                </button>
+                                <button class="btn-close-modal" onclick="closeImageModal()">
+                                    ✕ Đóng
+                                </button>
+                            </div>
+                        </div>
+                        <div class="image-container-modal" id="imageModalContainer">
+                            <img class="zoom-image" id="zoomImage" alt="Question Image">
+                            <div class="zoom-level-display" id="zoomLevelDisplay">100%</div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(imageModal);
+                
+                // Add drag functionality
+                const container = document.getElementById('imageModalContainer');
+                container.addEventListener('mousedown', startDrag);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', stopDrag);
+                
+                // Add wheel zoom
+                container.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+                    zoomImage(delta);
+                });
+            }
+            
+            // Set image and show modal
+            currentImageElement = document.getElementById('zoomImage');
+            currentImageElement.src = imageSrc;
+            resetImageView();
+            imageModal.classList.add('active');
+            
+            // Center image initially
+            setTimeout(() => centerImage(), 50);
+        }
+        
+        function closeImageModal() {
+            if (imageModal) {
+                imageModal.classList.remove('active');
+            }
+        }
+        
+        function zoomImage(delta) {
+            zoomLevel = Math.max(0.5, Math.min(5, zoomLevel + delta));
+            updateImageTransform();
+            document.getElementById('zoomLevelDisplay').textContent = Math.round(zoomLevel * 100) + '%';
+        }
+        
+        function resetImageView() {
+            zoomLevel = 1;
+            translateX = 0;
+            translateY = 0;
+            updateImageTransform();
+            document.getElementById('zoomLevelDisplay').textContent = '100%';
+            centerImage();
+        }
+        
+        function centerImage() {
+            if (!currentImageElement) return;
+            const container = document.getElementById('imageModalContainer');
+            const containerRect = container.getBoundingClientRect();
+            const imgRect = currentImageElement.getBoundingClientRect();
+            
+            translateX = (containerRect.width - imgRect.width) / 2;
+            translateY = (containerRect.height - imgRect.height) / 2;
+            updateImageTransform();
+        }
+        
+        function updateImageTransform() {
+            if (currentImageElement) {
+                currentImageElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoomLevel})`;
+            }
+        }
+        
+        function startDrag(e) {
+            if (e.target === currentImageElement || e.target.id === 'imageModalContainer') {
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                document.body.style.cursor = 'grabbing';
+            }
+        }
+        
+        function drag(e) {
+            if (isDragging) {
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                updateImageTransform();
+            }
+        }
+        
+        function stopDrag() {
+            isDragging = false;
+            document.body.style.cursor = 'default';
+        }
+        
+        // Close modal with ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && imageModal && imageModal.classList.contains('active')) {
+                closeImageModal();
+            }
+        });
+    </script>
+</body>
+</html>
