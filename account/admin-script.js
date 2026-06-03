@@ -20,6 +20,31 @@ if (!localStorage.getItem("courses")) {
 let currentQuestions = [];
 let editingQuestionIndex = -1;
 
+// Real-time listener cho users
+let usersListener = null;
+
+function setupRealtimeUserListener() {
+    try {
+        if (typeof FirebaseAPI === 'undefined' || !FirebaseAPI.listenToUsers) {
+            console.warn('Firebase API chưa sẵn sàng');
+            return;
+        }
+        
+        // Lắng nghe thay đổi users real-time từ Firebase
+        FirebaseAPI.listenToUsers((users) => {
+            console.log('📊 Cập nhật users từ Firebase:', users.length, 'accounts');
+            
+            // Nếu tab "Quản lý TK" đang mở, render lại ngay
+            const activeTab = document.querySelector('.tab-content.active');
+            if (activeTab && activeTab.id === 'tab-1') {
+                renderUsers();
+            }
+        });
+    } catch (error) {
+        console.error('Lỗi setup listener:', error);
+    }
+}
+
 // ===================================
 // QUẢN LÝ TABS
 // ===================================
@@ -34,7 +59,10 @@ function switchTab(index) {
     
     // Load dữ liệu khi chuyển tab
     if (index === 0) loadStats();
-    if (index === 1) renderUsers();
+    if (index === 1) {
+        renderUsers();
+        setupRealtimeUserListener(); // Bắt đầu lắng nghe khi vào tab
+    }
     if (index === 3) renderExamList();
     if (index === 4) {
         // Kiểm tra quyền Admin
@@ -318,24 +346,24 @@ async function deleteAllUsersData() {
             }
         }
 
-        // Remove progress div
-        progressDiv.remove();
-
         // Clear localStorage
         const localUsers = JSON.parse(localStorage.getItem("users")) || [];
         const newLocalUsers = localUsers.filter(u => u.role === 'admin');
         localStorage.setItem("users", JSON.stringify(newLocalUsers));
 
+        // Remove progress div
+        progressDiv.remove();
+
         // Show result
         alert(
             `✅ Hoàn thành!\n\n` +
-            `✓ Đã xóa: ${deletedCount} users\n` +
+            `✓ Đã xóa: ${deletedCount} users từ Firebase\n` +
             `${errorCount > 0 ? `❌ Lỗi: ${errorCount} users\n` : ''}` +
-            `✓ Đã xóa localStorage\n\n` +
-            `Admin account được giữ lại.`
+            `✓ Admin account được giữ lại\n\n` +
+            `📊 Dữ liệu sẽ tự động cập nhật khi có users mới đăng ký.`
         );
 
-        // Reload
+        // Reload immediately
         renderUsers();
         loadStats();
 
