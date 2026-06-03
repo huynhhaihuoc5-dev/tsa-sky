@@ -1,0 +1,32 @@
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+~*
+
+# Backup files
+*.bak
+*.backup
+
+# Local development
+.env
+.env.local
+
+# Firebase - BỎ COMMENT DÒNG DƯỚI ĐỂ BẢO MẬT API KEYS
+# firebase-config.js
+firebase-config.local.js
