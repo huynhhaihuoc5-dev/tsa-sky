@@ -288,6 +288,7 @@ async function deleteAllUsersData() {
         "Hành động này sẽ:\n" +
         "• Xóa TẤT CẢ users từ Firebase (trừ admin)\n" +
         "• Xóa TẤT CẢ IP records\n" +
+        "• Giải phóng tất cả IP để đăng ký lại\n" +
         "• KHÔNG THỂ KHÔI PHỤC!\n\n" +
         "Bạn có CHẮC CHẮN muốn tiếp tục?"
     );
@@ -321,6 +322,7 @@ async function deleteAllUsersData() {
 
         let deletedCount = 0;
         let errorCount = 0;
+        let freedIPs = 0;
 
         // Show progress
         const progressDiv = document.createElement('div');
@@ -336,9 +338,13 @@ async function deleteAllUsersData() {
             }
 
             try {
-                // Delete from Firebase
-                await FirebaseAPI.deleteUser(user.id);
-                deletedCount++;
+                // Delete from Firebase (sẽ xóa cả database + IP record)
+                const result = await FirebaseAPI.deleteUser(user.id);
+                
+                if (result.success) {
+                    deletedCount++;
+                    if (user.registeredIP) freedIPs++;
+                }
                 
                 document.getElementById('deleteProgress').textContent = 
                     `${deletedCount}/${allUsers.length - 1} (Đang xóa ${user.username})`;
@@ -356,9 +362,10 @@ async function deleteAllUsersData() {
         alert(
             `✅ Hoàn thành!\n\n` +
             `✓ Đã xóa: ${deletedCount} users từ Firebase\n` +
+            `✓ Đã giải phóng: ${freedIPs} IP addresses\n` +
             `${errorCount > 0 ? `❌ Lỗi: ${errorCount} users\n` : ''}` +
             `✓ Admin account được giữ lại\n\n` +
-            `📊 Dữ liệu sẽ tự động cập nhật khi có users mới đăng ký.`
+            `📊 Các IP đã giải phóng có thể đăng ký tài khoản mới.`
         );
 
         // Reload immediately

@@ -94,7 +94,7 @@ async function login() {
         return;
     }
 
-    // Tạo email từ username (dùng domain .vn vì Firebase không chấp nhận .local)
+    // Tạo email từ username
     const email = username + "@skyedu.id.vn";
 
     // Loading
@@ -122,6 +122,24 @@ async function login() {
             } else {
                 window.location.href = "../index.html";
             }
+        } else if (result.needIPConfirm) {
+            // IP khác với IP đã đăng ký
+            pendingIPUpdate = result;
+            
+            const confirmMsg = `⚠️ PHÁT HIỆN IP MỚI!\n\n` +
+                `IP đăng ký: ${result.oldIP}\n` +
+                `IP hiện tại: ${result.newIP}\n\n` +
+                `Bạn có muốn CẬP NHẬT IP đăng nhập không?\n\n` +
+                `✅ Đồng ý = Cho phép đăng nhập từ IP mới\n` +
+                `❌ Từ chối = Chỉ đăng nhập được từ IP cũ`;
+            
+            if (confirm(confirmMsg)) {
+                await confirmIPChange();
+            } else {
+                alert("❌ Đã từ chối đổi IP.\n\nBạn chỉ có thể đăng nhập từ IP đã đăng ký.");
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
         } else {
             alert("Lỗi: " + result.error);
             btn.textContent = originalText;
@@ -146,17 +164,28 @@ async function confirmIPChange() {
         );
 
         if (result.success) {
-            // Cập nhật localStorage
-            pendingIPUpdate.userData.ip = pendingIPUpdate.newIP;
-            localStorage.setItem("currentUser", JSON.stringify(pendingIPUpdate.userData));
+            // Cập nhật IP mới và đăng nhập lại
+            alert("✅ Đã cập nhật IP thành công!\n\nĐang đăng nhập...");
             
-            alert("Đã cập nhật IP thành công!");
+            // Gọi lại login để lấy session token
+            const email = pendingIPUpdate.userData.email;
+            const password = document.getElementById("password").value.trim();
             
-            // Chuyển hướng
-            if (pendingIPUpdate.userData.role === "admin" || pendingIPUpdate.userData.role === "moderator") {
-                window.location.href = "admin.html";
-            } else {
-                window.location.href = "../index.html";
+            const loginResult = await FirebaseAPI.loginUser(email, password);
+            
+            if (loginResult.success) {
+                const userData = {
+                    ...loginResult.userData,
+                    sessionToken: loginResult.sessionToken
+                };
+                localStorage.setItem("currentUser", JSON.stringify(userData));
+                
+                // Chuyển hướng
+                if (loginResult.userData.role === "admin" || loginResult.userData.role === "moderator") {
+                    window.location.href = "admin.html";
+                } else {
+                    window.location.href = "../index.html";
+                }
             }
         } else {
             alert("Lỗi cập nhật IP: " + result.error);

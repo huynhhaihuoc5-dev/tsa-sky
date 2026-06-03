@@ -61,10 +61,22 @@ const FirebaseAPI = {
     
     /**
      * Tạo user mới với Authentication + Database
-     * Cho phép nhiều account từ cùng 1 IP (như web thật)
+     * Giới hạn: 1 IP = 1 tài khoản
      */
     createUser: async function(email, password, fullname, username) {
         try {
+            // Lấy IP
+            const userIP = await this.getUserIP();
+            
+            // Kiểm tra IP đã được sử dụng chưa
+            const ipExists = await this.checkIPExists(userIP);
+            if (ipExists) {
+                return { 
+                    success: false, 
+                    error: 'IP này đã được sử dụng để đăng ký tài khoản!\n\nMỗi IP chỉ được đăng ký 1 tài khoản.' 
+                };
+            }
+            
             // Tạo tài khoản Firebase Auth
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
             const uid = userCredential.user.uid;
@@ -76,8 +88,17 @@ const FirebaseAPI = {
                 email,
                 role: 'user',
                 banned: false,
+                registeredIP: userIP,  // IP đăng ký
+                allowedIP: userIP,      // IP được phép đăng nhập
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
                 enrollments: []
+            });
+            
+            // Lưu IP record
+            await database.ref('ipRecords/' + userIP.replace(/\./g, '_')).set({
+                uid,
+                username,
+                registeredAt: firebase.database.ServerValue.TIMESTAMP
             });
             
             return { success: true, uid };
@@ -89,7 +110,8 @@ const FirebaseAPI = {
     
     /**
      * Đăng nhập
-     * Cho phép đăng nhập từ IP bất kỳ nhưng chỉ 1 session trên 1 account
+     * Giới hạn: 1 tài khoản chỉ đăng nhập từ 1 IP
+     * Nếu đổi IP cần xác nhận
      */
     loginUser: async function(email, password) {
         try {
@@ -110,13 +132,28 @@ const FirebaseAPI = {
                 return { success: false, error: 'Tài khoản đã bị khóa!' };
             }
             
-            // Tạo session token mới (chuỗi ngẫu nhiên + timestamp)
+            // Lấy IP hiện tại
+            const currentIP = await this.getUserIP();
+            
+            // Kiểm tra IP có khớp với allowedIP không
+            if (userData.allowedIP && userData.allowedIP !== currentIP) {
+                await auth.signOut();
+                return {
+                    success: false,
+                    needIPConfirm: true,
+                    userData: { uid, ...userData },
+                    oldIP: userData.allowedIP,
+                    newIP: currentIP
+                };
+            }
+            
+            // Tạo session token mới
             const sessionToken = 'token_' + uid + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             
-            // Cập nhật session token và thông tin đăng nhập
+            // Cập nhật session token và IP đăng nhập cuối
             await database.ref('users/' + uid).update({
                 sessionToken: sessionToken,
-                lastLoginIP: await this.getUserIP(),
+                lastLoginIP: currentIP,
                 lastLogin: firebase.database.ServerValue.TIMESTAMP
             });
             
@@ -132,10 +169,21 @@ const FirebaseAPI = {
     },
     
     /**
-     * Kiểm tra session token có hợp lệ không
-     * Nếu token không hợp lệ = đăng nhập ở chỗ khác rồi, logout
+     * Xác nhận đổi IP
+     * Cho phép user đăng nhập từ IP mới
      */
-    validateSessionToken: async function(uid, token) {
+    confirmIPUpdate: async function(uid, newIP) {
+        try {
+            await database.ref('users/' + uid).update({
+                allowedIP: newIP,
+                lastIPChange: firebase.database.ServerValue.TIMESTAMP
+            });
+            return { success: true };
+        } catch (error) {
+            console.error('Lỗi cập nhật IP:', error);
+            return { success: false, error: error.message };
+        }
+    },
         try {
             const snapshot = await database.ref('users/' + uid).once('value');
             const userData = snapshot.val();
@@ -182,11 +230,16 @@ const FirebaseAPI = {
     },
     
     /**
-     * (KHÔNG DÙNG NỮA) - Kiểm tra IP đã tồn tại chưa
-     * Bỏ hạn chế IP
+     * Kiểm tra IP đã được sử dụng để đăng ký chưa
      */
     checkIPExists: async function(ip) {
-        return false; // Luôn cho phép
+        try {
+            const snapshot = await database.ref('ipRecords/' + ip.replace(/\./g, '_')).once('value');
+            return snapshot.exists();
+        } catch (error) {
+            console.error('Lỗi kiểm tra IP:', error);
+            return false;
+        }
     },
     
     /**
@@ -251,20 +304,41 @@ const FirebaseAPI = {
     },
     
     /**
-     * Xóa user
+     * Xóa user hoàn toàn
+     * Xóa cả Authentication, Database và IP record
      */
     deleteUser: async function(userId) {
         try {
-            // Lấy thông tin user để xóa IP record
+            // Lấy thông tin user trước khi xóa
             const snapshot = await database.ref('users/' + userId).once('value');
             const userData = snapshot.val();
             
-            if (userData && userData.ip) {
-                await database.ref('ipRecords/' + userData.ip.replace(/\./g, '_')).remove();
+            if (!userData) {
+                return { success: false, error: 'User không tồn tại!' };
             }
             
+            // 1. Xóa IP record
+            if (userData.registeredIP) {
+                await database.ref('ipRecords/' + userData.registeredIP.replace(/\./g, '_')).remove();
+                console.log('✅ Đã xóa IP record:', userData.registeredIP);
+            }
+            
+            // 2. Xóa dữ liệu trong Realtime Database
             await database.ref('users/' + userId).remove();
-            return { success: true };
+            console.log('✅ Đã xóa user database:', userData.username);
+            
+            // 3. Xóa Firebase Authentication
+            // QUAN TRỌNG: Cần admin SDK để xóa user khác
+            // Vì Firebase Client SDK không cho phép xóa user khác
+            // Workaround: Xóa thủ công hoặc dùng Cloud Function
+            
+            // Note: User vẫn còn trong Firebase Auth nhưng không đăng nhập được
+            // vì database đã bị xóa
+            
+            return { 
+                success: true,
+                warning: 'User đã được xóa khỏi database. IP đã được giải phóng.'
+            };
         } catch (error) {
             console.error('Lỗi xóa user:', error);
             return { success: false, error: error.message };
