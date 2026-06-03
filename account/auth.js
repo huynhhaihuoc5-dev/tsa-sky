@@ -44,8 +44,8 @@ async function register() {
         return;
     }
 
-    // Tạo email từ username
-    const email = username + "@skyedu.local";
+    // Tạo email từ username (dùng domain .vn vì Firebase không chấp nhận .local)
+    const email = username + "@skyedu.id.vn";
 
     // Loading
     const btn = event.target;
@@ -94,8 +94,8 @@ async function login() {
         return;
     }
 
-    // Tạo email từ username
-    const email = username + "@skyedu.local";
+    // Tạo email từ username (dùng domain .vn vì Firebase không chấp nhận .local)
+    const email = username + "@skyedu.id.vn";
 
     // Loading
     const btn = event.target;

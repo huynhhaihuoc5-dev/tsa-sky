@@ -433,11 +433,11 @@ const FirebaseAPI = {
                 return { success: true, exists: true };
             }
             
-            // Tạo admin
-            const result = await this.createUser('admin@skyedu.com', 'Bh25052k8@', 'Administrator', 'admin');
+            // Tạo admin với email domain @skyedu.id.vn
+            const result = await this.createUser('admin@skyedu.id.vn', 'Bh25052k8@', 'Administrator', 'admin');
             if (result.success) {
                 await database.ref('users/' + result.uid).update({ role: 'admin' });
-                console.log('✅ Đã tạo admin mặc định: admin@skyedu.com / Bh25052k8@');
+                console.log('✅ Đã tạo admin mặc định: admin / Bh25052k8@');
             }
             return result;
         } catch (error) {

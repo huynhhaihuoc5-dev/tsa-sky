@@ -64,7 +64,7 @@ https://console.firebase.google.com/project/sky-edu-8be67/authentication/provide
 
 1. **Reload website**
 2. **Đăng ký tài khoản test** để kiểm tra
-3. **Đăng nhập admin:** admin@skyedu.com / Bh25052k8@
+3. **Đăng nhập admin:** username `admin` / password `Bh25052k8@`
 
 ---
 
