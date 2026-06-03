@@ -1,0 +1,49 @@
+📦 DANH SÁCH FILE CẦN UPLOAD LÊN GITHUB
+============================================
+
+✅ FIREBASE INTEGRATION (đã sửa trước)
+----------------------------------------
+1. firebase-config.js
+2. account/auth.js
+3. account/dang-ky.html
+4. account/dang-nhap.html
+5. account/admin.html
+6. account/tai-khoan.html
+7. account/doi-mat-khau.html
+
+✅ CLEAN URLs (vừa sửa xong)
+----------------------------------------
+8. index.html
+9. quy-doi-diem.html
+10. khoa-hoc-pages/index.html
+11. khoa-hoc-pages/detail.html
+12. phong-luyen-tsa/index.html
+13. phong-luyen-tsa/result.html
+14. phong-luyen-hsa/index.html
+15. phong-luyen-hsa/result.html
+16. account/admin-script.js
+17. anti-cheat.js
+
+📚 DOCUMENTATION
+----------------------------------------
+18. FIREBASE-SETUP-REQUIRED.md
+19. FIX-EMAIL-FORMAT-ERROR.md
+20. FILES-UPDATED-FIREBASE.md
+21. REMOVE-HTML-LINKS.md
+22. CLEAN-URL-COMPLETE.md
+23. UPLOAD-LIST.txt (file này)
+
+============================================
+TỔNG CỘNG: 23 FILES
+============================================
+
+🔥 QUAN TRỌNG:
+- Upload TẤT CẢ 23 files này
+- Giữ đúng cấu trúc thư mục
+- Test website sau khi upload xong
+
+🎯 URLs MỚI SAU KHI DEPLOY:
+- skyedu.id.vn/account/admin (không có .html)
+- skyedu.id.vn/account/dang-nhap
+- skyedu.id.vn/quy-doi-diem
+- v.v...

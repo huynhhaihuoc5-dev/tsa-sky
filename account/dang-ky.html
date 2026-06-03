@@ -22,18 +22,18 @@
             padding: 20px;
         }
         
-        .auth-container {
+        .card {
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(5, 26, 57, 0.1);
-            padding: 48px;
+            padding: 50px 40px;
             width: 100%;
-            max-width: 480px;
+            max-width: 450px;
+            box-shadow: 0 20px 60px rgba(5, 26, 57, 0.1);
         }
         
-        .logo-section {
+        .logo {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 30px;
         }
         
         .logo-text {
@@ -52,18 +52,18 @@
             font-weight: 500;
         }
         
-        h2 {
+        h1 {
             font-size: 24px;
             color: #0F172A;
-            margin-bottom: 8px;
             text-align: center;
+            margin-bottom: 10px;
         }
         
         .subtitle {
             text-align: center;
             color: #64748B;
             font-size: 14px;
-            margin-bottom: 32px;
+            margin-bottom: 30px;
         }
         
         .form-group {
@@ -72,15 +72,13 @@
         
         label {
             display: block;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 700;
             color: #334155;
             margin-bottom: 8px;
         }
         
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
+        input {
             width: 100%;
             padding: 14px 16px;
             border: 2px solid #E2E8F0;
@@ -93,6 +91,13 @@
         input:focus {
             border-color: #1677FF;
             box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+        }
+        
+        .password-note {
+            font-size: 12px;
+            color: #64748B;
+            margin-top: 6px;
+            line-height: 1.4;
         }
         
         .checkbox-group {
@@ -116,7 +121,7 @@
             cursor: pointer;
         }
         
-        .btn-primary {
+        .btn-register {
             width: 100%;
             padding: 14px;
             background: linear-gradient(135deg, #1677FF 0%, #4364F7 100%);
@@ -127,16 +132,26 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
-        .btn-primary:hover {
+        .btn-register:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(22, 119, 255, 0.3);
         }
         
+        .btn-register:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         .footer-link {
             text-align: center;
-            margin-top: 24px;
+            margin-top: 20px;
             font-size: 14px;
             color: #64748B;
         }
@@ -153,16 +168,16 @@
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="logo-section">
+    <div class="card">
+        <div class="logo">
             <div class="logo-text">SKY EDU</div>
             <div class="logo-subtitle">Fly higher - Think better</div>
         </div>
         
-        <h2>Đăng ký tài khoản</h2>
+        <h1>Đăng ký tài khoản</h1>
         <p class="subtitle">Tạo tài khoản để bắt đầu học tập</p>
         
-        <form onsubmit="event.preventDefault(); register();">
+        <form id="registerForm">
             <div class="form-group">
                 <label>Họ và tên</label>
                 <input type="text" id="fullname" placeholder="Nhập họ và tên" required>
@@ -170,22 +185,25 @@
             
             <div class="form-group">
                 <label>Tên đăng nhập</label>
-                <input type="text" id="username" placeholder="Nhập tên đăng nhập (tối thiểu 6 ký tự)" required 
-                       oninput="validateAndShowEmail(this)">
-                <small style="color: #64748B; font-size: 13px; display: block; margin-top: 4px;">
-                    Chỉ dùng chữ cái không dấu (a-z), số (0-9) và dấu gạch dưới (_)
-                </small>
-                <small id="emailPreview" style="color: #1677FF; font-size: 13px; display: none; margin-top: 4px; font-weight: 600;">
-                    📧 Email của bạn: <span id="generatedEmail"></span>
+                <input type="text" id="username" placeholder="Nhập tên đăng nhập" required minlength="6">
+                <small style="color: #64748B; font-size: 12px; display: block; margin-top: 4px;">
+                    Tối thiểu 6 ký tự (chữ cái, số, gạch dưới)
                 </small>
             </div>
             
             <div class="form-group">
                 <label>Mật khẩu</label>
                 <input type="password" id="password" placeholder="Nhập mật khẩu" required>
-                <small style="color: #64748B; font-size: 13px; display: block; margin-top: 4px;">
-                    Tối thiểu 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt
-                </small>
+                <div class="password-note">
+                    • Tối thiểu 8 ký tự<br>
+                    • 1 chữ hoa, 1 chữ thường<br>
+                    • 1 số, 1 ký tự đặc biệt (@$!%*?&.#)
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Xác nhận mật khẩu</label>
+                <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu" required>
             </div>
             
             <div class="checkbox-group">
@@ -193,11 +211,13 @@
                 <label for="agree-terms">Tôi đồng ý với điều khoản sử dụng</label>
             </div>
             
-            <button type="submit" class="btn-primary">Đăng ký</button>
+            <button type="submit" class="btn-register">
+                <span>👤</span> Đăng ký
+            </button>
         </form>
         
         <div class="footer-link">
-            Đã có tài khoản? <a href="dang-nhap.html">Đăng nhập</a>
+            Đã có tài khoản? <a href="dang-nhap.html.html">Đăng nhập</a>
         </div>
     </div>
     
@@ -205,34 +225,88 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
-    <!-- Firebase Config -->
     <script src="../firebase-config.js"></script>
     
-    <!-- Auth Logic -->
-    <script src="auth.js"></script>
-    
-    <!-- Username Validation -->
     <script>
-        function validateAndShowEmail(input) {
-            let username = input.value.trim();
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            // Xóa các ký tự không hợp lệ (chỉ giữ a-z, 0-9, _)
-            username = username.toLowerCase().replace(/[^a-z0-9_]/g, '');
+            const fullname = document.getElementById('fullname').value.trim();
+            const username = document.getElementById('username').value.trim().toLowerCase();
+            const password = document.getElementById('password').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
             
-            // Cập nhật lại input nếu có thay đổi
-            if (input.value !== username) {
-                input.value = username;
+            // Validation
+            if (!fullname || !username || !password) {
+                alert('Vui lòng nhập đầy đủ thông tin');
+                return;
             }
             
-            // Hiển thị email preview
-            if (username.length >= 3) {
-                document.getElementById('generatedEmail').textContent = username + '@skyedu.id.vn';
-                document.getElementById('emailPreview').style.display = 'block';
-            } else {
-                document.getElementById('emailPreview').style.display = 'none';
+            if (username.length < 6) {
+                alert('Tên đăng nhập phải từ 6 ký tự trở lên');
+                return;
             }
-        }
+            
+            if (!/^[a-z0-9_]{6,}$/.test(username)) {
+                alert('Tên đăng nhập chỉ chứa chữ cái, số và gạch dưới');
+                return;
+            }
+            
+            if (password.length < 8) {
+                alert('Mật khẩu phải từ 8 ký tự trở lên');
+                return;
+            }
+            
+            if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#])/.test(password)) {
+                alert('Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                alert('Mật khẩu xác nhận không khớp');
+                return;
+            }
+            
+            // Register
+            const btn = document.querySelector('.btn-register');
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Đang xử lý...';
+            
+            try {
+                const email = username + '@skyedu.id.vn';
+                const userCred = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                const uid = userCred.user.uid;
+                
+                // Lấy IP
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+                
+                // Lưu vào database
+                await firebase.database().ref('users/' + uid).set({
+                    fullname,
+                    username,
+                    email,
+                    role: 'user',
+                    banned: false,
+                    ip: userIP,
+                    lastIPChange: firebase.database.ServerValue.TIMESTAMP,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                alert('✅ Đăng ký thành công! Chuyển đến trang đăng nhập...');
+                window.location.href = 'dang-nhap.html';
+            } catch (error) {
+                console.error('Lỗi:', error);
+                if (error.code === 'auth/email-already-in-use') {
+                    alert('Tên đăng nhập này đã được sử dụng');
+                } else {
+                    alert('Lỗi: ' + error.message);
+                }
+                btn.disabled = false;
+                btn.innerHTML = '<span>👤</span> Đăng ký';
+            }
+        });
     </script>
 </body>
 </html>
