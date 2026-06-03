@@ -93,6 +93,18 @@ function switchTab(index) {
 
 async function loadStats() {
     try {
+        // Check if Firebase is ready
+        if (typeof FirebaseAPI === 'undefined') {
+            console.warn('FirebaseAPI chưa sẵn sàng, đang chờ...');
+            document.getElementById("totalUsers").textContent = "...";
+            document.getElementById("activeUsers").textContent = "...";
+            document.getElementById("bannedUsers").textContent = "...";
+            
+            // Retry after 1 second
+            setTimeout(loadStats, 1000);
+            return;
+        }
+        
         const users = await FirebaseAPI.getAllUsers();
         const exams = JSON.parse(localStorage.getItem("exams")) || [];
         const courses = JSON.parse(localStorage.getItem("courses")) || [];
@@ -122,6 +134,22 @@ async function renderUsers() {
     const isAdmin = currentUser.role === 'admin';
     
     try {
+        // Check if Firebase is ready
+        if (typeof FirebaseAPI === 'undefined') {
+            document.getElementById("userTable").innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #F59E0B;">
+                        <h3>⏳ Đang kết nối Firebase...</h3>
+                        <p>Vui lòng đợi...</p>
+                    </td>
+                </tr>
+            `;
+            
+            // Retry after 1 second
+            setTimeout(renderUsers, 1000);
+            return;
+        }
+        
         // Fetch users từ Firebase
         const users = await FirebaseAPI.getAllUsers();
         
@@ -147,7 +175,7 @@ async function renderUsers() {
                 </td>
                 <td>
                     <code style="font-size: 11px; color: #64748B;">
-                        ${user.lastLoginIP ? user.lastLoginIP : 'Chưa đăng nhập'}
+                        ${user.lastLoginIP ? user.lastLoginIP : user.registeredIP ? user.registeredIP : 'Chưa có'}
                     </code>
                 </td>
                 <td>
@@ -183,7 +211,7 @@ async function renderUsers() {
         
         document.getElementById("userTable").innerHTML = html;
         
-        // Update stats
+        // Update stats luôn
         loadStats();
         
     } catch (error) {
@@ -193,6 +221,7 @@ async function renderUsers() {
                 <td colspan="6" style="text-align: center; padding: 40px; color: #EF4444;">
                     <h3>❌ Lỗi tải dữ liệu</h3>
                     <p>${error.message}</p>
+                    <button class="btn btn-primary" onclick="renderUsers()" style="margin-top: 10px;">🔄 Thử lại</button>
                 </td>
             </tr>
         `;

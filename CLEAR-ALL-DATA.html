@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xóa Hết Dữ Liệu - SKY EDU</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 { color: #EF4444; }
+        button {
+            background: #EF4444;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button:hover { background: #DC2626; }
+        .success { color: #10B981; font-weight: bold; }
+        .error { color: #EF4444; font-weight: bold; }
+        .info { color: #1677FF; }
+        pre {
+            background: #1e293b;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+        .warning {
+            background: #FEF3C7;
+            border: 2px solid #F59E0B;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚠️ XÓA HẾT DỮ LIỆU - SKY EDU</h1>
+    
+    <div class="box">
+        <div class="warning">
+            <h3>⚠️ CẢNH BÁO:</h3>
+            <p>Script này sẽ xóa <strong>TẤT CẢ</strong>:</p>
+            <ul>
+                <li>✓ Tất cả users trong Realtime Database (kể cả admin)</li>
+                <li>✓ Tất cả IP records</li>
+                <li>✓ localStorage currentUser</li>
+            </ul>
+            <p style="color: #EF4444; font-weight: bold;">SAU KHI XÓA: Hệ thống sẽ tự động tạo lại admin account khi refresh trang.</p>
+        </div>
+
+        <button onclick="clearAllData()">🗑️ XÓA HẾT TẤT CẢ</button>
+        
+        <div id="result" style="margin-top: 20px;"></div>
+    </div>
+
+    <div class="box">
+        <h2>📋 Console Logs</h2>
+        <pre id="logs"></pre>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <script>
+        // Override console.log
+        const originalLog = console.log;
+        const logs = [];
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logs.push(args.join(' '));
+            document.getElementById('logs').textContent = logs.join('\n');
+        };
+
+        async function clearAllData() {
+            const resultDiv = document.getElementById('result');
+            
+            const confirmed = confirm(
+                '⚠️ BẠN CHẮC CHẮN?\n\n' +
+                'Hành động này sẽ XÓA HẾT:\n' +
+                '• Tất cả users (kể cả admin)\n' +
+                '• Tất cả IP records\n' +
+                '• localStorage\n\n' +
+                'KHÔNG THỂ KHÔI PHỤC!\n\n' +
+                'Nhấn OK để tiếp tục.'
+            );
+
+            if (!confirmed) {
+                resultDiv.innerHTML = '<span class="error">❌ Đã hủy</span>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<span class="info">⏳ Đang xóa...</span>';
+
+            try {
+                const db = firebase.database();
+                let deletedUsers = 0;
+                let deletedIPs = 0;
+
+                // 1. Xóa tất cả users
+                console.log('🔄 Đang xóa users...');
+                await db.ref('users').remove();
+                console.log('✅ Đã xóa tất cả users');
+                deletedUsers = 'ALL';
+
+                // 2. Xóa tất cả IP records
+                console.log('🔄 Đang xóa IP records...');
+                await db.ref('ipRecords').remove();
+                console.log('✅ Đã xóa tất cả IP records');
+                deletedIPs = 'ALL';
+
+                // 3. Xóa localStorage
+                console.log('🔄 Đang xóa localStorage...');
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('users');
+                console.log('✅ Đã xóa localStorage');
+
+                // 4. Đăng xuất Firebase Auth
+                if (firebase.auth().currentUser) {
+                    await firebase.auth().signOut();
+                    console.log('✅ Đã đăng xuất Firebase Auth');
+                }
+
+                resultDiv.innerHTML = `
+                    <div style="background: #DCFCE7; padding: 20px; border-radius: 8px; border: 2px solid #10B981;">
+                        <h3 class="success">✅ ĐÃ XÓA HẾT!</h3>
+                        <p>• Users: ${deletedUsers}</p>
+                        <p>• IP Records: ${deletedIPs}</p>
+                        <p>• localStorage: Cleared</p>
+                        <hr style="margin: 15px 0;">
+                        <p style="color: #1677FF; font-weight: bold;">
+                            🔄 REFRESH TRANG để hệ thống tự động tạo lại admin account mới!
+                        </p>
+                        <button onclick="location.reload()" style="background: #1677FF; margin-top: 10px;">
+                            🔄 Refresh Ngay
+                        </button>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('❌ Lỗi:', error);
+                resultDiv.innerHTML = `
+                    <span class="error">❌ Lỗi: ${error.message}</span><br>
+                    <button onclick="clearAllData()" style="margin-top: 10px;">🔄 Thử lại</button>
+                `;
+            }
+        }
+
+        // Check Firebase status
+        setTimeout(() => {
+            if (typeof firebase === 'undefined' || firebase.apps.length === 0) {
+                document.getElementById('result').innerHTML = 
+                    '<span class="error">❌ Firebase chưa được khởi tạo!</span>';
+            } else {
+                console.log('✅ Firebase sẵn sàng');
+                console.log('Project:', firebase.apps[0].options.projectId);
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
