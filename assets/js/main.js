@@ -1,41 +1,31 @@
 
 
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded", async () => {
 
-    const currentUser =
-    JSON.parse(
-        localStorage.getItem("currentUser")
-    );
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-    const guestMenu =
-    document.getElementById("guestMenu");
+    // ✅ KIỂM TRA SESSION - Nếu đăng nhập từ chỗ khác sẽ logout tự động
+    if (currentUser && currentUser.uid && currentUser.sessionToken) {
+        const isValidSession = await FirebaseAPI.validateSessionToken(currentUser.uid, currentUser.sessionToken);
+        if (!isValidSession) {
+            // Session không hợp lệ = đăng nhập ở chỗ khác rồi
+            localStorage.removeItem("currentUser");
+            alert("⚠️ Phiên đăng nhập đã hết hạn!\n\nBạn vừa đăng nhập từ một thiết bị khác.\n\nVui lòng đăng nhập lại.");
+            window.location.href = "/account/dang-nhap.html";
+            return;
+        }
+    }
 
-    const guestRegister =
-    document.getElementById("guestRegister");
-
-    const userMenu =
-    document.getElementById("userMenu");
-
-    const userBtn =
-    document.getElementById("userBtn");
-
-    const dropdownMenu =
-    document.getElementById("dropdownMenu");
-
-    const navUsername =
-    document.getElementById("navUsername");
-
-    const navAvatar =
-    document.getElementById("navAvatar");
-
-    const dropdownAvatar =
-    document.getElementById("dropdownAvatar");
-
-    const dropdownName =
-    document.getElementById("dropdownName");
-
-    const adminLink =
-    document.getElementById("adminLink");
+    const guestMenu = document.getElementById("guestMenu");
+    const guestRegister = document.getElementById("guestRegister");
+    const userMenu = document.getElementById("userMenu");
+    const userBtn = document.getElementById("userBtn");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const navUsername = document.getElementById("navUsername");
+    const navAvatar = document.getElementById("navAvatar");
+    const dropdownAvatar = document.getElementById("dropdownAvatar");
+    const dropdownName = document.getElementById("dropdownName");
+    const adminLink = document.getElementById("adminLink");
 
     if(currentUser){
 

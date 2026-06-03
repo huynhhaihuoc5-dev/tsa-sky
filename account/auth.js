@@ -107,8 +107,12 @@ async function login() {
         const result = await FirebaseAPI.loginUser(email, password);
 
         if (result.success) {
-            // Lưu thông tin user vào localStorage
-            localStorage.setItem("currentUser", JSON.stringify(result.userData));
+            // Lưu thông tin user + session token vào localStorage
+            const userData = {
+                ...result.userData,
+                sessionToken: result.sessionToken
+            };
+            localStorage.setItem("currentUser", JSON.stringify(userData));
             
             alert("Đăng nhập thành công!");
 
@@ -117,16 +121,6 @@ async function login() {
                 window.location.href = "admin.html";
             } else {
                 window.location.href = "../index.html";
-            }
-        } else if (result.needIPConfirm) {
-            // Cần xác nhận đổi IP
-            pendingIPUpdate = result;
-            
-            if (confirm(`Phát hiện IP mới!\n\nBạn có muốn cập nhật IP đăng nhập không?\n\n⚠️ Sau khi cập nhật, bạn phải chờ 7 ngày để đổi IP lần tiếp theo.`)) {
-                await confirmIPChange();
-            } else {
-                btn.textContent = originalText;
-                btn.disabled = false;
             }
         } else {
             alert("Lỗi: " + result.error);
@@ -177,7 +171,18 @@ async function confirmIPChange() {
 // ĐĂNG XUẤT
 // =====================================
 
-function logout() {
+async function logout() {
+    try {
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        
+        if (currentUser && currentUser.uid) {
+            // Gọi API logout để xóa session token từ Firebase
+            await FirebaseAPI.logoutUser(currentUser.uid);
+        }
+    } catch (error) {
+        console.error("Lỗi đăng xuất:", error);
+    }
+    
     // Đăng xuất Firebase
     if (typeof firebase !== 'undefined' && firebase.auth()) {
         firebase.auth().signOut();

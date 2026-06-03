@@ -51,93 +51,186 @@ function switchTab(index) {
 // TAB 0: THỐNG KÊ
 // ===================================
 
-function loadStats() {
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    const exams = JSON.parse(localStorage.getItem("exams")) || [];
-    const courses = JSON.parse(localStorage.getItem("courses")) || [];
-    
-    document.getElementById("totalUsers").textContent = users.length;
-    document.getElementById("activeUsers").textContent = users.filter(u => !u.banned).length;
-    document.getElementById("bannedUsers").textContent = users.filter(u => u.banned).length;
-    document.getElementById("totalExams").textContent = exams.length;
-    document.getElementById("totalCourses").textContent = courses.length;
+async function loadStats() {
+    try {
+        const users = await FirebaseAPI.getAllUsers();
+        const exams = JSON.parse(localStorage.getItem("exams")) || [];
+        const courses = JSON.parse(localStorage.getItem("courses")) || [];
+        
+        const totalUsers = users ? users.length : 0;
+        const activeUsers = users ? users.filter(u => !u.banned).length : 0;
+        const bannedUsers = users ? users.filter(u => u.banned).length : 0;
+        
+        document.getElementById("totalUsers").textContent = totalUsers;
+        document.getElementById("activeUsers").textContent = activeUsers;
+        document.getElementById("bannedUsers").textContent = bannedUsers;
+        document.getElementById("totalExams").textContent = exams.length;
+        document.getElementById("totalCourses").textContent = courses.length;
+    } catch (error) {
+        console.error('Lỗi tải thống kê:', error);
+        document.getElementById("totalUsers").textContent = "?";
+        document.getElementById("activeUsers").textContent = "?";
+        document.getElementById("bannedUsers").textContent = "?";
+    }
 }
 
 // ===================================
 // TAB 1: QUẢN LÝ TÀI KHOẢN
 // ===================================
 
-function renderUsers() {
-    const users = JSON.parse(localStorage.getItem("users")) || [];
+async function renderUsers() {
     const isAdmin = currentUser.role === 'admin';
     
-    const html = users.map((user, index) => `
-        <tr>
-            <td>${user.fullname}</td>
-            <td>${user.username}</td>
-            <td><code style="font-size: 11px;">${user.ip || 'Chưa có'}</code></td>
-            <td><span class="badge ${user.role === 'admin' ? 'badge-admin' : user.role === 'moderator' ? 'badge-warning' : 'badge-active'}">${user.role === 'admin' ? 'Admin' : user.role === 'moderator' ? 'Quản trị viên' : 'User'}</span></td>
-            <td><span class="badge ${user.banned ? 'badge-banned' : 'badge-active'}">${user.banned ? 'Đã khóa' : 'Hoạt động'}</span></td>
-            <td>
-                <button class="btn btn-warning" onclick="toggleBan(${index})">${user.banned ? 'Mở khóa' : 'Khóa'}</button>
-                ${isAdmin && user.role !== 'admin' && user.role !== 'moderator' ? `<button class="btn btn-primary" onclick="setModerator(${index})">Gán QTV</button>` : ''}
-                ${isAdmin && user.role === 'moderator' ? `<button class="btn btn-secondary" onclick="removeModerator(${index})">Hủy QTV</button>` : ''}
-                ${isAdmin && user.role !== 'admin' ? `<button class="btn btn-danger" onclick="deleteUser(${index})">Xóa</button>` : ''}
-            </td>
-        </tr>
-    `).join('');
-    document.getElementById("userTable").innerHTML = html;
+    try {
+        // Fetch users từ Firebase
+        const users = await FirebaseAPI.getAllUsers();
+        
+        if (!users || users.length === 0) {
+            document.getElementById("userTable").innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #64748B;">
+                        <h3>📭 Không có tài khoản nào</h3>
+                        <p>Các tài khoản mới sẽ hiển thị ở đây</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        const html = users.map((user, index) => `
+            <tr>
+                <td>${user.fullname}</td>
+                <td>
+                    <code style="font-size: 12px; background: #F0F9FF; padding: 4px 8px; border-radius: 4px;">
+                        ${user.username}
+                    </code>
+                </td>
+                <td>
+                    <code style="font-size: 11px; color: #64748B;">
+                        ${user.lastLoginIP ? user.lastLoginIP : 'Chưa đăng nhập'}
+                    </code>
+                </td>
+                <td>
+                    <span class="badge ${
+                        user.role === 'admin' ? 'badge-admin' : 
+                        user.role === 'moderator' ? 'badge-warning' : 
+                        'badge-active'
+                    }">
+                        ${user.role === 'admin' ? '👑 Admin' : user.role === 'moderator' ? '👮 QTV' : 'User'}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge ${user.banned ? 'badge-banned' : 'badge-active'}">
+                        ${user.banned ? '🔒 Đã khóa' : '✅ Hoạt động'}
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-warning" onclick="toggleBanUser('${user.id}', ${user.banned})">
+                        ${user.banned ? '🔓 Mở' : '🔒 Khóa'}
+                    </button>
+                    ${isAdmin && user.role !== 'admin' && user.role !== 'moderator' ? `
+                        <button class="btn btn-primary" onclick="setModerator('${user.id}')">👮 QTV</button>
+                    ` : ''}
+                    ${isAdmin && user.role === 'moderator' ? `
+                        <button class="btn btn-secondary" onclick="removeModerator('${user.id}')">✘ QTV</button>
+                    ` : ''}
+                    ${isAdmin && user.role !== 'admin' ? `
+                        <button class="btn btn-danger" onclick="deleteUser('${user.id}')">🗑️ Xóa</button>
+                    ` : ''}
+                </td>
+            </tr>
+        `).join('');
+        
+        document.getElementById("userTable").innerHTML = html;
+        
+        // Update stats
+        loadStats();
+        
+    } catch (error) {
+        console.error('Lỗi tải users:', error);
+        document.getElementById("userTable").innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px; color: #EF4444;">
+                    <h3>❌ Lỗi tải dữ liệu</h3>
+                    <p>${error.message}</p>
+                </td>
+            </tr>
+        `;
+    }
 }
 
-function setModerator(index) {
+async function setModerator(userId) {
     if (currentUser.role !== 'admin') {
         alert("Chỉ Admin mới có quyền gán Quản trị viên!");
         return;
     }
     if (!confirm("Gán quyền Quản trị viên cho user này?\n\nQuản trị viên có thể:\n• Quản lý đề thi\n• Quản lý tài khoản\n• KHÔNG thể xóa user\n• KHÔNG thể quản lý khóa học")) return;
     
-    const users = JSON.parse(localStorage.getItem("users"));
-    users[index].role = "moderator";
-    localStorage.setItem("users", JSON.stringify(users));
-    alert("✅ Đã gán quyền Quản trị viên!");
-    renderUsers();
+    try {
+        const result = await FirebaseAPI.updateUser(userId, { role: 'moderator' });
+        if (result.success) {
+            alert("✅ Đã gán quyền Quản trị viên!");
+            renderUsers();
+        } else {
+            alert("❌ Lỗi: " + result.error);
+        }
+    } catch (error) {
+        alert("❌ Có lỗi xảy ra: " + error.message);
+    }
 }
 
-function removeModerator(index) {
+async function removeModerator(userId) {
     if (currentUser.role !== 'admin') {
         alert("Chỉ Admin mới có quyền hủy Quản trị viên!");
         return;
     }
     if (!confirm("Hủy quyền Quản trị viên?")) return;
     
-    const users = JSON.parse(localStorage.getItem("users"));
-    users[index].role = "user";
-    localStorage.setItem("users", JSON.stringify(users));
-    alert("✅ Đã hủy quyền Quản trị viên!");
-    renderUsers();
-}
-
-function toggleBan(index) {
-    const users = JSON.parse(localStorage.getItem("users"));
-    if (users[index].role === "admin") {
-        alert("Không thể khóa Admin!");
-        return;
+    try {
+        const result = await FirebaseAPI.updateUser(userId, { role: 'user' });
+        if (result.success) {
+            alert("✅ Đã hủy quyền Quản trị viên!");
+            renderUsers();
+        } else {
+            alert("❌ Lỗi: " + result.error);
+        }
+    } catch (error) {
+        alert("❌ Có lỗi xảy ra: " + error.message);
     }
-    users[index].banned = !users[index].banned;
-    localStorage.setItem("users", JSON.stringify(users));
-    renderUsers();
 }
 
-function deleteUser(index) {
+async function toggleBanUser(userId, currentlyBanned) {
+    try {
+        const result = await FirebaseAPI.toggleBanUser(userId, !currentlyBanned);
+        if (result.success) {
+            alert(!currentlyBanned ? "✅ Đã khóa tài khoản!" : "✅ Đã mở khóa tài khoản!");
+            renderUsers();
+        } else {
+            alert("❌ Lỗi: " + result.error);
+        }
+    } catch (error) {
+        alert("❌ Có lỗi xảy ra: " + error.message);
+    }
+}
+
+async function deleteUser(userId) {
     if (currentUser.role !== 'admin') {
         alert("Chỉ Admin mới có quyền xóa user!");
         return;
     }
-    if (!confirm("Xóa tài khoản này?")) return;
-    const users = JSON.parse(localStorage.getItem("users"));
-    users.splice(index, 1);
-    localStorage.setItem("users", JSON.stringify(users));
-    renderUsers();
+    if (!confirm("Xóa tài khoản này?\n\n⚠️ Hành động này không thể khôi phục!")) return;
+    
+    try {
+        const result = await FirebaseAPI.deleteUser(userId);
+        if (result.success) {
+            alert("✅ Đã xóa tài khoản!");
+            renderUsers();
+        } else {
+            alert("❌ Lỗi: " + result.error);
+        }
+    } catch (error) {
+        alert("❌ Có lỗi xảy ra: " + error.message);
+    }
 }
 
 // ===================================
@@ -270,21 +363,7 @@ async function syncUsersFromFirebase() {
             return;
         }
 
-        // Update localStorage (for backward compatibility)
-        const localUsers = users.map(u => ({
-            fullname: u.fullname,
-            username: u.username,
-            email: u.email,
-            role: u.role,
-            banned: u.banned,
-            ip: u.ip,
-            lastIPChange: u.lastIPChange,
-            enrollments: u.enrollments || []
-        }));
-
-        localStorage.setItem("users", JSON.stringify(localUsers));
-
-        alert(`✅ Đã sync ${users.length} users từ Firebase!`);
+        alert(`✅ Sync thành công!\n\nTổng cộng: ${users.length} users\n• Admin: 1\n• Thường: ${users.length - 1}`);
         renderUsers();
         loadStats();
 

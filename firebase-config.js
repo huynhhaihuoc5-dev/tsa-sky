@@ -61,23 +61,13 @@ const FirebaseAPI = {
     
     /**
      * Tạo user mới với Authentication + Database
+     * Cho phép nhiều account từ cùng 1 IP (như web thật)
      */
     createUser: async function(email, password, fullname, username) {
         try {
             // Tạo tài khoản Firebase Auth
             const userCredential = await auth.createUserWithEmailAndPassword(email, password);
             const uid = userCredential.user.uid;
-            
-            // Lấy IP
-            const userIP = await this.getUserIP();
-            
-            // Kiểm tra IP đã tồn tại chưa
-            const ipExists = await this.checkIPExists(userIP);
-            if (ipExists) {
-                // Xóa user vừa tạo
-                await userCredential.user.delete();
-                return { success: false, error: 'IP này đã được sử dụng để đăng ký!' };
-            }
             
             // Lưu thông tin vào Realtime Database
             await database.ref('users/' + uid).set({
@@ -86,17 +76,8 @@ const FirebaseAPI = {
                 email,
                 role: 'user',
                 banned: false,
-                ip: userIP,
-                lastIPChange: firebase.database.ServerValue.TIMESTAMP,
                 createdAt: firebase.database.ServerValue.TIMESTAMP,
                 enrollments: []
-            });
-            
-            // Lưu IP record
-            await database.ref('ipRecords/' + userIP.replace(/\./g, '_')).set({
-                uid,
-                username,
-                registeredAt: firebase.database.ServerValue.TIMESTAMP
             });
             
             return { success: true, uid };
@@ -108,6 +89,7 @@ const FirebaseAPI = {
     
     /**
      * Đăng nhập
+     * Cho phép đăng nhập từ IP bất kỳ nhưng chỉ 1 session trên 1 account
      */
     loginUser: async function(email, password) {
         try {
@@ -128,37 +110,20 @@ const FirebaseAPI = {
                 return { success: false, error: 'Tài khoản đã bị khóa!' };
             }
             
-            // Kiểm tra IP
-            const currentIP = await this.getUserIP();
+            // Tạo session token mới (chuỗi ngẫu nhiên + timestamp)
+            const sessionToken = 'token_' + uid + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             
-            if (userData.ip && userData.ip !== currentIP) {
-                // Tính số ngày kể từ lần đổi IP cuối
-                const lastChange = userData.lastIPChange || userData.createdAt;
-                const daysSinceLastChange = (Date.now() - lastChange) / (1000 * 60 * 60 * 24);
-                
-                if (daysSinceLastChange < 7) {
-                    await auth.signOut();
-                    const daysLeft = Math.ceil(7 - daysSinceLastChange);
-                    return { 
-                        success: false, 
-                        error: `IP đăng nhập khác với IP đã đăng ký!\n\nBạn chỉ có thể đổi IP sau ${daysLeft} ngày nữa.`,
-                        needIPUpdate: true,
-                        daysLeft
-                    };
-                }
-                
-                // Cho phép đổi IP
-                return {
-                    success: false,
-                    needIPConfirm: true,
-                    userData: { uid, ...userData },
-                    newIP: currentIP
-                };
-            }
+            // Cập nhật session token và thông tin đăng nhập
+            await database.ref('users/' + uid).update({
+                sessionToken: sessionToken,
+                lastLoginIP: await this.getUserIP(),
+                lastLogin: firebase.database.ServerValue.TIMESTAMP
+            });
             
             return { 
                 success: true, 
-                userData: { uid, ...userData } 
+                sessionToken: sessionToken,
+                userData: { uid, ...userData, sessionToken: sessionToken } 
             };
         } catch (error) {
             console.error('Lỗi đăng nhập:', error);
@@ -167,17 +132,37 @@ const FirebaseAPI = {
     },
     
     /**
-     * Xác nhận đổi IP
+     * Kiểm tra session token có hợp lệ không
+     * Nếu token không hợp lệ = đăng nhập ở chỗ khác rồi, logout
      */
-    confirmIPUpdate: async function(uid, newIP) {
+    validateSessionToken: async function(uid, token) {
+        try {
+            const snapshot = await database.ref('users/' + uid).once('value');
+            const userData = snapshot.val();
+            
+            if (!userData) return false;
+            if (userData.banned) return false;
+            if (userData.sessionToken !== token) return false; // Token không khớp = session khác
+            
+            return true;
+        } catch (error) {
+            console.error('Lỗi kiểm tra session:', error);
+            return false;
+        }
+    },
+    
+    /**
+     * Đăng xuất - xóa session token
+     */
+    logoutUser: async function(uid) {
         try {
             await database.ref('users/' + uid).update({
-                ip: newIP,
-                lastIPChange: firebase.database.ServerValue.TIMESTAMP
+                sessionToken: null
             });
+            await auth.signOut();
             return { success: true };
         } catch (error) {
-            console.error('Lỗi cập nhật IP:', error);
+            console.error('Lỗi đăng xuất:', error);
             return { success: false, error: error.message };
         }
     },
@@ -197,16 +182,11 @@ const FirebaseAPI = {
     },
     
     /**
-     * Kiểm tra IP đã tồn tại chưa
+     * (KHÔNG DÙNG NỮA) - Kiểm tra IP đã tồn tại chưa
+     * Bỏ hạn chế IP
      */
     checkIPExists: async function(ip) {
-        try {
-            const snapshot = await database.ref('ipRecords/' + ip.replace(/\./g, '_')).once('value');
-            return snapshot.exists();
-        } catch (error) {
-            console.error('Lỗi kiểm tra IP:', error);
-            return false;
-        }
+        return false; // Luôn cho phép
     },
     
     /**
