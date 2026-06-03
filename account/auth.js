@@ -11,7 +11,7 @@ let pendingIPUpdate = null;
 
 async function register() {
     const fullname = document.getElementById("fullname").value.trim();
-    const username = document.getElementById("username").value.trim();
+    const username = document.getElementById("username").value.trim().toLowerCase();
     const password = document.getElementById("password").value.trim();
 
     if (!fullname || !username || !password) {
@@ -21,6 +21,13 @@ async function register() {
 
     if (username.length < 6) {
         alert("Tên đăng nhập phải từ 6 ký tự trở lên");
+        return;
+    }
+
+    // Kiểm tra username chỉ chứa a-z, 0-9, _
+    const usernameRegex = /^[a-z0-9_]{6,}$/;
+    if (!usernameRegex.test(username)) {
+        alert("Tên đăng nhập chỉ được chứa:\n\n• Chữ cái không dấu (a-z)\n• Số (0-9)\n• Dấu gạch dưới (_)\n\nVà phải từ 6 ký tự trở lên");
         return;
     }
 
@@ -79,7 +86,7 @@ async function register() {
 // =====================================
 
 async function login() {
-    const username = document.getElementById("username").value.trim();
+    const username = document.getElementById("username").value.trim().toLowerCase();
     const password = document.getElementById("password").value.trim();
 
     if (!username || !password) {

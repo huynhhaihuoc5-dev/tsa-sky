@@ -170,9 +170,13 @@
             
             <div class="form-group">
                 <label>Tên đăng nhập</label>
-                <input type="text" id="username" placeholder="Nhập tên đăng nhập (tối thiểu 6 ký tự)" required>
+                <input type="text" id="username" placeholder="Nhập tên đăng nhập (tối thiểu 6 ký tự)" required 
+                       oninput="validateAndShowEmail(this)">
                 <small style="color: #64748B; font-size: 13px; display: block; margin-top: 4px;">
-                    Tên đăng nhập không thể thay đổi sau khi tạo
+                    Chỉ dùng chữ cái không dấu (a-z), số (0-9) và dấu gạch dưới (_)
+                </small>
+                <small id="emailPreview" style="color: #1677FF; font-size: 13px; display: none; margin-top: 4px; font-weight: 600;">
+                    📧 Email của bạn: <span id="generatedEmail"></span>
                 </small>
             </div>
             
@@ -207,5 +211,28 @@
     
     <!-- Auth Logic -->
     <script src="auth.js"></script>
+    
+    <!-- Username Validation -->
+    <script>
+        function validateAndShowEmail(input) {
+            let username = input.value.trim();
+            
+            // Xóa các ký tự không hợp lệ (chỉ giữ a-z, 0-9, _)
+            username = username.toLowerCase().replace(/[^a-z0-9_]/g, '');
+            
+            // Cập nhật lại input nếu có thay đổi
+            if (input.value !== username) {
+                input.value = username;
+            }
+            
+            // Hiển thị email preview
+            if (username.length >= 3) {
+                document.getElementById('generatedEmail').textContent = username + '@skyedu.local';
+                document.getElementById('emailPreview').style.display = 'block';
+            } else {
+                document.getElementById('emailPreview').style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
