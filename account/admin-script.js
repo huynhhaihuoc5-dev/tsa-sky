@@ -39,11 +39,23 @@ function setupRealtimeUserListener() {
             if (activeTab && activeTab.id === 'tab-1') {
                 renderUsers();
             }
+            
+            // Cập nhật stats luôn
+            loadStats();
         });
     } catch (error) {
         console.error('Lỗi setup listener:', error);
     }
 }
+
+// Khởi động listener ngay khi load trang
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Admin Panel loaded, khởi động listener...');
+    setTimeout(() => {
+        setupRealtimeUserListener();
+        loadStats();
+    }, 1000);
+});
 
 // ===================================
 // QUẢN LÝ TABS
@@ -295,16 +307,7 @@ async function deleteAllUsersData() {
     try {
         // Check if Firebase is available
         if (typeof FirebaseAPI === 'undefined') {
-            alert("❌ Firebase chưa được khởi tạo!\n\nChỉ có thể xóa dữ liệu localStorage.");
-            
-            // Fallback: Xóa localStorage
-            const users = JSON.parse(localStorage.getItem("users")) || [];
-            const newUsers = users.filter(u => u.role === 'admin');
-            localStorage.setItem("users", JSON.stringify(newUsers));
-            
-            alert("✅ Đã xóa dữ liệu từ localStorage!");
-            renderUsers();
-            loadStats();
+            alert("❌ Firebase chưa được khởi tạo!\n\nKhông thể xóa dữ liệu.");
             return;
         }
 
@@ -345,11 +348,6 @@ async function deleteAllUsersData() {
                 errorCount++;
             }
         }
-
-        // Clear localStorage
-        const localUsers = JSON.parse(localStorage.getItem("users")) || [];
-        const newLocalUsers = localUsers.filter(u => u.role === 'admin');
-        localStorage.setItem("users", JSON.stringify(newLocalUsers));
 
         // Remove progress div
         progressDiv.remove();

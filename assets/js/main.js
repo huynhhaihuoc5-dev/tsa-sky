@@ -5,14 +5,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
     // ✅ KIỂM TRA SESSION - Nếu đăng nhập từ chỗ khác sẽ logout tự động
+    // CHỈ kiểm tra nếu Firebase đã sẵn sàng
     if (currentUser && currentUser.uid && currentUser.sessionToken) {
-        const isValidSession = await FirebaseAPI.validateSessionToken(currentUser.uid, currentUser.sessionToken);
-        if (!isValidSession) {
-            // Session không hợp lệ = đăng nhập ở chỗ khác rồi
-            localStorage.removeItem("currentUser");
-            alert("⚠️ Phiên đăng nhập đã hết hạn!\n\nBạn vừa đăng nhập từ một thiết bị khác.\n\nVui lòng đăng nhập lại.");
-            window.location.href = "/account/dang-nhap.html";
-            return;
+        try {
+            if (typeof FirebaseAPI !== 'undefined' && FirebaseAPI.validateSessionToken) {
+                const isValidSession = await FirebaseAPI.validateSessionToken(currentUser.uid, currentUser.sessionToken);
+                if (!isValidSession) {
+                    // Session không hợp lệ = đăng nhập ở chỗ khác rồi
+                    localStorage.removeItem("currentUser");
+                    alert("⚠️ Phiên đăng nhập đã hết hạn!\n\nBạn vừa đăng nhập từ một thiết bị khác.\n\nVui lòng đăng nhập lại.");
+                    window.location.href = "/account/dang-nhap.html";
+                    return;
+                }
+            }
+        } catch (error) {
+            console.warn('Session validation error:', error);
+            // Không logout nếu có lỗi check session
         }
     }
 
