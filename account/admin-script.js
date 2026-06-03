@@ -22,10 +22,33 @@ let editingQuestionIndex = -1;
 
 // Real-time listener cho users
 let usersListener = null;
+let firebaseReady = false;
+let firebaseCheckInterval = null;
+
+// Kiểm tra Firebase sẵn sàng
+function checkFirebaseReady() {
+    if (typeof FirebaseAPI !== 'undefined' && FirebaseAPI.isReady && FirebaseAPI.isReady() && FirebaseAPI.listenToUsers) {
+        console.log('✅ Firebase API đã sẵn sàng');
+        firebaseReady = true;
+        
+        // Dừng interval check
+        if (firebaseCheckInterval) {
+            clearInterval(firebaseCheckInterval);
+            firebaseCheckInterval = null;
+        }
+        
+        // Khởi động hệ thống
+        setupRealtimeUserListener();
+        loadStats();
+        
+        return true;
+    }
+    return false;
+}
 
 function setupRealtimeUserListener() {
     try {
-        if (typeof FirebaseAPI === 'undefined' || !FirebaseAPI.listenToUsers) {
+        if (!firebaseReady) {
             console.warn('Firebase API chưa sẵn sàng');
             return;
         }
@@ -50,11 +73,47 @@ function setupRealtimeUserListener() {
 
 // Khởi động listener ngay khi load trang
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Admin Panel loaded, khởi động listener...');
-    setTimeout(() => {
-        setupRealtimeUserListener();
-        loadStats();
-    }, 1000);
+    console.log('Admin Panel loaded, đang kiểm tra Firebase...');
+    
+    // Lắng nghe event firebaseReady
+    window.addEventListener('firebaseReady', function() {
+        console.log('✅ Nhận được event firebaseReady');
+        if (!checkFirebaseReady()) {
+            console.warn('⚠️ Event firebaseReady nhưng FirebaseAPI chưa ready');
+        }
+    });
+    
+    // Thử check ngay lập tức
+    if (!checkFirebaseReady()) {
+        console.log('⏳ Đang đợi Firebase khởi tạo...');
+        
+        // Kiểm tra lại mỗi 100ms (nhanh hơn)
+        firebaseCheckInterval = setInterval(() => {
+            if (checkFirebaseReady()) {
+                console.log('✅ Firebase ready sau khi chờ');
+            }
+        }, 100);
+        
+        // Timeout sau 10 giây
+        setTimeout(() => {
+            if (!firebaseReady && firebaseCheckInterval) {
+                clearInterval(firebaseCheckInterval);
+                console.error('❌ Firebase không khởi tạo sau 10 giây');
+                
+                // Hiển thị lỗi chi tiết
+                const errorDetails = [];
+                errorDetails.push('Firebase không khởi tạo sau 10 giây');
+                errorDetails.push('');
+                errorDetails.push('Kiểm tra:');
+                errorDetails.push('1. FirebaseAPI: ' + (typeof FirebaseAPI !== 'undefined' ? '✅' : '❌'));
+                errorDetails.push('2. FirebaseAPI.isReady: ' + (typeof FirebaseAPI !== 'undefined' && FirebaseAPI.isReady ? FirebaseAPI.isReady() : '❌'));
+                errorDetails.push('3. firebase global: ' + (typeof firebase !== 'undefined' ? '✅' : '❌'));
+                errorDetails.push('4. firebase.apps: ' + (typeof firebase !== 'undefined' ? firebase.apps.length : 'N/A'));
+                
+                alert('❌ Lỗi kết nối Firebase!\n\n' + errorDetails.join('\n') + '\n\nVui lòng refresh trang.');
+            }
+        }, 10000);
+    }
 });
 
 // ===================================
@@ -94,14 +153,11 @@ function switchTab(index) {
 async function loadStats() {
     try {
         // Check if Firebase is ready
-        if (typeof FirebaseAPI === 'undefined') {
-            console.warn('FirebaseAPI chưa sẵn sàng, đang chờ...');
+        if (!firebaseReady) {
+            console.warn('Firebase chưa sẵn sàng, hiển thị loading...');
             document.getElementById("totalUsers").textContent = "...";
             document.getElementById("activeUsers").textContent = "...";
             document.getElementById("bannedUsers").textContent = "...";
-            
-            // Retry after 1 second
-            setTimeout(loadStats, 1000);
             return;
         }
         
@@ -135,7 +191,7 @@ async function renderUsers() {
     
     try {
         // Check if Firebase is ready
-        if (typeof FirebaseAPI === 'undefined') {
+        if (!firebaseReady) {
             document.getElementById("userTable").innerHTML = `
                 <tr>
                     <td colspan="6" style="text-align: center; padding: 40px; color: #F59E0B;">
@@ -144,9 +200,6 @@ async function renderUsers() {
                     </td>
                 </tr>
             `;
-            
-            // Retry after 1 second
-            setTimeout(renderUsers, 1000);
             return;
         }
         
@@ -336,7 +389,7 @@ async function deleteAllUsersData() {
 
     try {
         // Check if Firebase is available
-        if (typeof FirebaseAPI === 'undefined') {
+        if (!firebaseReady) {
             alert("❌ Firebase chưa được khởi tạo!\n\nKhông thể xóa dữ liệu.");
             return;
         }

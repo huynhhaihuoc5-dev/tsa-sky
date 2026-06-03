@@ -20,35 +20,76 @@ const firebaseConfig = {
 
 // Initialize Firebase
 let app, auth, database;
+let firebaseInitialized = false;
 
-// Kiểm tra Firebase SDK đã load chưa
-if (typeof firebase === 'undefined') {
-    console.error('❌ Firebase SDK chưa được load! Vui lòng kiểm tra các script tags.');
+// Hàm khởi tạo Firebase
+function initializeFirebase() {
+    if (firebaseInitialized) {
+        console.log('✅ Firebase đã được khởi tạo trước đó');
+        return true;
+    }
     
-    // Tạo dummy FirebaseAPI để tránh lỗi
-    window.FirebaseAPI = {
-        createUser: async () => ({ success: false, error: 'Firebase chưa được cài đặt' }),
-        loginUser: async () => ({ success: false, error: 'Firebase chưa được cài đặt' }),
-        getAllUsers: async () => [],
-        deleteUser: async () => ({ success: false }),
-        toggleBanUser: async () => ({ success: false }),
-        getUserByUsername: async () => null,
-        updateUser: async () => ({ success: false }),
-        confirmIPUpdate: async () => ({ success: false }),
-        getUserIP: async () => 'unknown',
-        checkIPExists: async () => false,
-        createDefaultAdmin: async () => ({ success: false })
-    };
-} else {
+    // Kiểm tra Firebase SDK đã load chưa
+    if (typeof firebase === 'undefined') {
+        console.error('❌ Firebase SDK chưa được load! Vui lòng kiểm tra các script tags.');
+        return false;
+    }
+    
     try {
-        app = firebase.initializeApp(firebaseConfig);
+        // Kiểm tra xem đã có app nào được init chưa
+        if (firebase.apps.length === 0) {
+            app = firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase initialized successfully');
+        } else {
+            app = firebase.app(); // Sử dụng app đã có
+            console.log('✅ Firebase app đã tồn tại, sử dụng lại');
+        }
+        
         auth = firebase.auth();
         database = firebase.database();
-        console.log('✅ Firebase initialized successfully');
+        firebaseInitialized = true;
+        
         console.log('📦 Project:', firebaseConfig.projectId);
+        console.log('🔥 Firebase Auth ready:', !!auth);
+        console.log('💾 Firebase Database ready:', !!database);
+        
+        // Dispatch event để báo Firebase đã sẵn sàng
+        window.dispatchEvent(new Event('firebaseReady'));
+        
+        return true;
     } catch (error) {
         console.error('❌ Firebase initialization failed:', error);
         console.error('Config:', firebaseConfig);
+        return false;
+    }
+}
+
+// Khởi tạo Firebase khi script load xong
+console.log('🔥 firebase-config.js đang chạy...');
+console.log('🔥 typeof firebase:', typeof firebase);
+
+// Đợi một chút để Firebase SDK hoàn toàn sẵn sàng
+if (typeof firebase !== 'undefined') {
+    console.log('✅ Firebase global detected, initializing...');
+    // Thử init ngay
+    const initResult = initializeFirebase();
+    console.log('🔥 Init result:', initResult);
+} else {
+    console.warn('⚠️ Firebase chưa load, đợi DOMContentLoaded...');
+    // Nếu chưa có, đợi DOMContentLoaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOMContentLoaded, trying to init Firebase...');
+            setTimeout(() => {
+                initializeFirebase();
+            }, 100);
+        });
+    } else {
+        // DOM đã load rồi, thử sau 100ms
+        setTimeout(() => {
+            console.log('⏰ Delayed init after 100ms...');
+            initializeFirebase();
+        }, 100);
     }
 }
 
@@ -57,6 +98,11 @@ if (typeof firebase === 'undefined') {
  */
 const FirebaseAPI = {
     
+    // Kiểm tra Firebase đã sẵn sàng chưa
+    isReady: function() {
+        return firebaseInitialized && !!auth && !!database;
+    },
+    
     // ==================== USERS ====================
     
     /**
@@ -64,6 +110,10 @@ const FirebaseAPI = {
      * Giới hạn: 1 IP = 1 tài khoản
      */
     createUser: async function(email, password, fullname, username) {
+        if (!this.isReady()) {
+            return { success: false, error: 'Firebase chưa sẵn sàng. Vui lòng đợi...' };
+        }
+        
         try {
             // Lấy IP
             const userIP = await this.getUserIP();
@@ -184,6 +234,11 @@ const FirebaseAPI = {
             return { success: false, error: error.message };
         }
     },
+    
+    /**
+     * Validate session token
+     */
+    validateSession: async function(uid, token) {
         try {
             const snapshot = await database.ref('users/' + uid).once('value');
             const userData = snapshot.val();
@@ -566,24 +621,44 @@ const FirebaseAPI = {
 };
 
 console.log('✅ Firebase API ready');
+console.log('📊 FirebaseAPI.isReady:', FirebaseAPI.isReady ? FirebaseAPI.isReady() : 'N/A');
+
+// Đảm bảo FirebaseAPI có thể truy cập global
+window.FirebaseAPI = FirebaseAPI;
+console.log('🌐 FirebaseAPI exported to window');
 
 // Export để dùng trong các file khác
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = FirebaseAPI;
 }
 
+// Log khi script load
+console.log('🔥 firebase-config.js loaded completely');
+console.log('🔥 window.FirebaseAPI:', typeof window.FirebaseAPI);
+
 // Tự động tạo admin khi load lần đầu
 if (typeof window !== 'undefined') {
     window.addEventListener('load', function() {
-        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-            // Đợi 2 giây để Firebase khởi tạo xong
-            setTimeout(() => {
-                FirebaseAPI.createDefaultAdmin().catch(err => {
-                    console.warn('⚠️ Không thể tạo admin tự động:', err.message);
-                });
-            }, 2000);
-        } else {
-            console.warn('⚠️ Firebase chưa sẵn sàng. Admin sẽ không được tạo tự động.');
-        }
+        console.log('🌐 Window loaded, checking Firebase...');
+        
+        // Đợi thêm một chút nữa
+        setTimeout(() => {
+            if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                console.log('✅ Firebase app detected, will create admin in 2s');
+                // Đợi 2 giây để Firebase khởi tạo xong
+                setTimeout(() => {
+                    if (FirebaseAPI.isReady()) {
+                        FirebaseAPI.createDefaultAdmin().catch(err => {
+                            console.warn('⚠️ Không thể tạo admin tự động:', err.message);
+                        });
+                    } else {
+                        console.warn('⚠️ FirebaseAPI chưa ready để tạo admin');
+                    }
+                }, 2000);
+            } else {
+                console.warn('⚠️ Firebase chưa sẵn sàng khi window load. Admin sẽ không được tạo tự động.');
+                console.warn('   firebase apps:', typeof firebase !== 'undefined' ? firebase.apps.length : 'N/A');
+            }
+        }, 500);
     });
 }

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Firebase</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        .log {
+            background: #000;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #00ff00;
+        }
+        .error { border-left-color: #ff0000; color: #ff0000; }
+        .success { border-left-color: #00ff00; color: #00ff00; }
+        .warning { border-left-color: #ffaa00; color: #ffaa00; }
+        .info { border-left-color: #00aaff; color: #00aaff; }
+        h1 { color: #00ff00; }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+        button:hover { background: #00aa00; }
+    </style>
+</head>
+<body>
+    <h1>🔥 TEST FIREBASE ADMIN PANEL</h1>
+    <div id="logs"></div>
+    
+    <div style="margin-top: 20px;">
+        <button onclick="testGetUsers()">Test Get Users</button>
+        <button onclick="testCreateAdmin()">Test Create Admin</button>
+        <button onclick="window.location.href='account/admin.html'">Mở Admin Panel</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script>
+        console.log('1️⃣ Firebase SDK scripts loaded');
+        console.log('   typeof firebase:', typeof firebase);
+    </script>
+    
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        console.log('2️⃣ firebase-config.js loaded');
+        console.log('   typeof FirebaseAPI:', typeof FirebaseAPI);
+        console.log('   typeof window.FirebaseAPI:', typeof window.FirebaseAPI);
+    </script>
+    
+    <script>
+        const logsDiv = document.getElementById('logs');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsDiv.appendChild(div);
+            console.log(message);
+        }
+        
+        // Test ngay khi load
+        window.addEventListener('load', function() {
+            log('🌐 Window loaded', 'info');
+            
+            // Đợi 1.5 giây để firebase-config.js init xong
+            setTimeout(() => {
+                log('===== KIỂM TRA FIREBASE =====', 'info');
+                
+                // 1. Check Firebase global
+                if (typeof firebase === 'undefined') {
+                    log('❌ Firebase SDK chưa load!', 'error');
+                } else {
+                    log('✅ Firebase SDK loaded', 'success');
+                    log(`📦 Firebase apps: ${firebase.apps.length}`, firebase.apps.length > 0 ? 'success' : 'error');
+                    
+                    if (firebase.apps.length > 0) {
+                        log(`📦 App name: ${firebase.apps[0].name}`, 'info');
+                        log(`📦 App options:`, 'info');
+                        log(`   projectId: ${firebase.apps[0].options.projectId}`, 'info');
+                    }
+                }
+                
+                // 2. Check window.FirebaseAPI
+                if (typeof window.FirebaseAPI === 'undefined') {
+                    log('❌ window.FirebaseAPI không tồn tại!', 'error');
+                } else {
+                    log('✅ window.FirebaseAPI exists', 'success');
+                }
+                
+                // 3. Check FirebaseAPI
+                if (typeof FirebaseAPI === 'undefined') {
+                    log('❌ FirebaseAPI (global) không tồn tại!', 'error');
+                } else {
+                    log('✅ FirebaseAPI (global) exists', 'success');
+                    
+                    if (typeof FirebaseAPI.isReady === 'function') {
+                        const ready = FirebaseAPI.isReady();
+                        log(`🔍 FirebaseAPI.isReady(): ${ready}`, ready ? 'success' : 'warning');
+                    } else {
+                        log('❌ FirebaseAPI.isReady không phải function!', 'error');
+                    }
+                    
+                    log('📋 FirebaseAPI methods:', 'info');
+                    const methods = Object.keys(FirebaseAPI);
+                    log(`   Tổng: ${methods.length} methods`, 'info');
+                    methods.slice(0, 15).forEach(m => {
+                        log(`   - ${m}`, 'info');
+                    });
+                }
+                
+                // 4. Check firebase-config variables
+                if (typeof firebaseInitialized !== 'undefined') {
+                    log(`🔥 firebaseInitialized: ${firebaseInitialized}`, firebaseInitialized ? 'success' : 'warning');
+                } else {
+                    log('❌ firebaseInitialized không tồn tại!', 'error');
+                }
+                
+                if (typeof auth !== 'undefined') {
+                    log(`🔐 auth object: ${!!auth}`, !!auth ? 'success' : 'error');
+                } else {
+                    log('❌ auth không tồn tại!', 'error');
+                }
+                
+                if (typeof database !== 'undefined') {
+                    log(`💾 database object: ${!!database}`, !!database ? 'success' : 'error');
+                } else {
+                    log('❌ database không tồn tại!', 'error');
+                }
+                
+                log('===== KẾT THÚC KIỂM TRA =====', 'info');
+            }, 1500);
+        });
+        
+        async function testGetUsers() {
+            log('🔄 Testing getAllUsers()...', 'info');
+            
+            if (typeof FirebaseAPI === 'undefined') {
+                log('❌ FirebaseAPI không tồn tại!', 'error');
+                return;
+            }
+            
+            if (!FirebaseAPI.isReady || !FirebaseAPI.isReady()) {
+                log('❌ Firebase chưa sẵn sàng!', 'error');
+                return;
+            }
+            
+            try {
+                const users = await FirebaseAPI.getAllUsers();
+                log(`✅ Lấy được ${users.length} users`, 'success');
+                users.forEach(u => {
+                    log(`  - ${u.username} (${u.role})`, 'info');
+                });
+            } catch (error) {
+                log(`❌ Lỗi: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testCreateAdmin() {
+            log('🔄 Testing createDefaultAdmin()...', 'info');
+            
+            if (typeof FirebaseAPI === 'undefined') {
+                log('❌ FirebaseAPI không tồn tại!', 'error');
+                return;
+            }
+            
+            if (!FirebaseAPI.isReady || !FirebaseAPI.isReady()) {
+                log('❌ Firebase chưa sẵn sàng!', 'error');
+                return;
+            }
+            
+            try {
+                const result = await FirebaseAPI.createDefaultAdmin();
+                if (result.success) {
+                    if (result.exists) {
+                        log('✅ Admin đã tồn tại', 'success');
+                    } else {
+                        log('✅ Đã tạo admin mới', 'success');
+                    }
+                } else {
+                    log(`❌ Lỗi: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Lỗi: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
